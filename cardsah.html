@@ -1,0 +1,2788 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Cards Against Humanity</title>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link href="https://fonts.googleapis.com/css2?family=Josefin+Sans:ital,wght@0,100..700;1,100..700&family=Outfit:wght@100..900&family=Roboto+Slab:wght@100..900&family=Inconsolata:wght@200..900&display=swap" rel="stylesheet">
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+		<link rel="icon" type="image/x-icon" href="icon.png">
+		<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+		<script src="https://wurfl.io/wurfl.js"></script>
+		<style>
+			/*----------------------
+				General Stylings
+			----------------------*/
+
+			html, body {
+				height: 100%;
+				margin: 0;
+			}
+
+			body {
+				background-color: #8CD8FF;
+				font-family: "Roboto Slab", serif;
+				display: flex;
+				justify-content: space-evenly;
+				align-content: center;
+				align-items: center;
+				padding: 0 5px;
+			}
+
+			.con {
+				display: none;
+				flex-direction: column;
+				justify-content: space-between;
+				align-content: center;
+				align-items: center;
+				background-color: white;
+				color: black;
+				border: 3px solid black;
+				border-radius: 20px;
+				padding: 1vw 10px 2vw 10px;
+				text-align: center;
+				width: max(55vw, 360px);
+				height: max(60vh, 310px);
+				user-select: none;
+				animation-fill-mode: forwards;
+				margin-bottom: 7.5%;
+			}
+
+			.con#submit {
+				height: max(60vh, 530px);
+			}
+
+			.conrow {
+				display: flex;
+				flex-direction: row;
+				justify-content: center;
+				align-items: center;
+				gap: 2vw;
+				width: 100%;
+			}
+
+			@keyframes flip {
+				from {
+					transform: rotateY(0);
+				}
+
+				to {
+					transform: rotateY(90deg);
+				}
+			}
+
+			@keyframes unflip {
+				from {
+					transform: rotateY(270deg);
+				}
+
+				to {
+					transform: rotateY(360deg);
+				}
+			}
+
+			.maintitle {
+				margin: 0;
+			}
+
+			.elemn {
+				padding: 1vw 1.5vw;
+				background-color: white;
+				color: black;
+				border: 2.5px solid black;
+				border-radius: 15px;
+			}
+
+			.btn {
+				cursor: pointer;
+			}
+
+			.btn:hover {
+				animation: btnhover 300ms;
+				background-color: #E9E9E9;
+			}
+
+			@keyframes btnhover {
+				from {
+					background-color: white;
+				}
+
+				to {
+					background-color: #E9E9E9;
+				}
+			}
+
+			.btn:focus {
+				outline: none;
+				font-weight: 900;
+			}
+
+			.checkbox {
+				border: 2px solid black;
+				border-radius: 7px;
+				cursor: pointer;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				width: max(4vw, 30px);
+				height: max(4vw, 30px);
+			}
+
+			.checkbox:focus {
+				outline: none;
+				animation: checkboxfocus 200ms;
+				background-color: #EEE;
+			}
+
+			.checkboxcheck {
+				font-size: 200%;
+				display: none;
+			}
+
+			@keyframes checkboxfocus {
+				from {
+					background-color: white;
+				}
+
+				to {
+					background-color: #EEE;
+				}
+			}
+
+			.textbox {
+				resize: none;
+				font-size: max(min(1.5vw, 2vh), 10px) !important;
+				padding: 1vh 1vh;
+				width: 60%;
+				height: 150px;
+				min-height: 56px;
+			}
+
+			/*-----------------------
+				Specific Stylings
+			-----------------------*/
+
+			#creditsMain {
+				margin: 0;
+			}
+
+			#fflabelCreate, #fflabelSubmit {
+				font-size: max(2.5vw, 25px);
+			}
+
+			#cardtypeSubmit {
+				margin-top: 10px;
+			}
+
+			#descSubmit {
+				font-size: max(min(1.5vw, 2vh), 14px);
+				width: 85%;
+			}
+
+			#charactercountSubmit {
+				margin: 10px 0 0 0;
+			}
+
+			#load {
+				width: 100%;
+				height: 100%;
+				position: fixed;
+				background-color: black;
+				opacity: 0.5;
+				perspective: 500px;
+				align-items: center;
+				justify-content: center;
+				display: none;
+			}
+
+			.loader {
+				width: max(3vmin, 10px);
+				height: max(3vmin, 10px);
+				background-color: white;
+				opacity: 1;
+				position: fixed;
+			}
+
+			.loader.animatedloader {
+				width: max(7vmin, 30px);
+				height: max(7vmin, 30px);
+				position: relative;
+				animation: loader 3s infinite linear;
+			}
+
+			@keyframes loader {
+				from {
+					transform: rotate3d(0, 1, 0, -180deg);
+					margin: 0 calc(2 * max(7vmin, 30px)) 0 0;
+				}
+
+				12% {
+					transform: rotate3d(0, 0, 1, -180deg);
+					margin: 0 calc(2 * max(7vmin, 30px)) calc(2 * max(7vmin, 30px)) 0;
+				}
+
+				25% {
+					transform: rotate3d(1, 0, 0, -180deg);
+					margin: 0 0 calc(2 * max(7vmin, 30px)) 0;
+				}
+
+				37% {
+					transform: rotate3d(0, 0, 1, 180deg);
+					margin: 0 0 calc(2 * max(7vmin, 30px)) calc(2 * max(7vmin, 30px));
+				}
+
+				50% {
+					transform: rotate3d(0, 1, 0, 180deg);
+					margin: 0 0 0 calc(2 * max(7vmin, 30px));
+				}
+
+				62% {
+					transform: rotate3d(0, 0, 1, -180deg);
+					margin: calc(2 * max(7vmin, 30px)) 0 0 calc(2 * max(7vmin, 30px));
+				}
+
+				75% {
+					transform: rotate3d(1, 0, 0, 180deg);
+					margin: calc(2 * max(7vmin, 30px)) 0 0 0;
+				}
+
+				87% {
+					transform: rotate3d(0, 0, 1, 180deg);
+					margin: calc(2 * max(7vmin, 30px)) calc(2 * max(7vmin, 30px)) 0 0;
+				}
+
+				to {
+					transform: rotate3d(0, 1, 0, -180deg);
+					margin: 0 calc(2 * max(7vmin, 30px)) 0 0;
+				}
+			}
+
+			/*--------------------
+				@media queries
+			--------------------*/
+
+			@media (min-width: 750px) {
+				.maintitle {
+					font-size: 50px;
+				}
+
+				.elemn {
+					font-size: 25px;
+				}
+			}
+
+			@media (max-width: 750px) {
+				.maintitle {
+					font-size: 42px;
+				}
+
+				.elemn {
+					font-size: 20px;
+				}
+			}
+
+			@media (max-width: 400px) {
+				html:not(:has(body.gamescreenactive)) {
+					height: auto;
+				}
+
+				#descSubmit {
+					font-size: 4vw;
+				}
+			}
+
+			@media (max-height: 580px) {
+				html:not(:has(body.gamescreenactive)) {
+					height: auto;
+					padding: 5px;
+				}
+			}
+		</style>
+		<style>
+			body.gamescreenactive {
+				padding: 0;
+				background-color: black;
+				overflow: hidden;
+				perspective: 800px;
+			}
+
+			/* General stylings */
+
+			.gamecon {
+				display: none;
+				width: 100%;
+				height: 100%;
+				margin, padding: 0;
+			}
+
+			.strikethroughhover:hover {
+				text-decoration: line-through;
+			}
+
+			.invisible {
+				display: none;
+			}
+
+			/* Specific stylings */
+
+			#lobby {
+				background: url(https://static.vecteezy.com/system/resources/previews/007/078/763/non_2x/seamless-pattern-with-business-set-icons-doodle-with-business-icons-on-black-background-vintage-business-icons-sweet-elements-background-for-your-project-free-vector.jpg);
+				flex-direction: column;
+				background-position: 0 0;
+				animation: bgpos 10s linear infinite;
+			}
+
+			@keyframes bgpos {
+				from {
+					background-position: 0 0;
+				}
+
+				to {
+					background-position: 980px 0;
+				}
+			}
+
+			@keyframes zoomout {
+				from {
+					transform: translateZ(0);
+				}
+
+				to {
+					transform: translateZ(-1000000px);
+				}
+			}
+
+			#lobby * {
+				z-index: 1;
+				color: white;
+				font-family: "Josefin Sans", serif;
+			}
+
+			.opacitydiv {
+				width: 100%;
+				height: 100%;
+				background-color: black;
+				position: fixed;
+				z-index: 0;
+				opacity: 0.5;
+			}
+
+			#topbarLobby, #playerlistdivLobby, #bottombarLobby {
+				background-color: rgb(82, 29, 163);
+			}
+
+			#topbarLobby, #bottombarLobby {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				align-content: center;
+				padding: 15px 30px;
+			}
+
+			#topbarLobby {
+				height: max(15vh, 150px);
+				border-bottom: 10px solid rgb(63, 21, 128);
+				gap: 10px;
+			}
+
+			#gamecodedivLobby {
+				text-align: center;
+				display: flex;
+				flex-direction: column;
+			}
+
+			#gamecodedivLobby p {
+				text-shadow: .1em .1em rgb(53, 16, 100);
+				line-height: .9em;
+				margin: 0;
+			}
+
+			#gamecodeLobby {
+				font-size: max(2.5vw, 25px);
+			}
+
+			#codeLobby {
+				font-size: max(12vmin, 75px);
+				font-family: Outfit;
+			}
+
+			#playerlistdivLobby {
+				height: max(75vh, 390px);
+				overflow: auto;
+				background: transparent;
+			}
+
+			#playerlistLobby, #namelistGame {
+				list-style-type: none;
+				display: flex;
+				flex-wrap: wrap;
+				justify-content: center;
+				gap: 1vw;
+				padding: 0;
+			}
+
+			#playerlistLobby li {
+				background-color: #3229D6;
+				border: 1vmin solid #241DA3;
+				padding: 2vw 3vw;
+				font-size: 4vmax;
+				overflow-wrap: anywhere;
+				text-align: center;
+			}
+
+			#bottombarLobby {
+				height: max(10vh, 60px);
+				border-top: 10px solid rgb(63, 21, 128);
+			}
+
+			#hostdivLobby {
+				display: flex;
+				align-items: center;
+				align-content: center;
+				width: 100%;
+			}
+
+			#hostLobby {
+				margin: 0 0 -2vh 0;
+				font-size: 11vmin;
+				text-shadow: .08em .08em rgb(53, 16, 100);
+			}
+
+			#hostnameLobby {
+				width: 100%;
+				word-wrap: break-word;
+				overflow-wrap: anywhere;
+				text-shadow: .07em .07em rgb(53, 16, 100);
+				font-family: "Inconsolata", serif;
+				font-size: 8vmin;
+				line-height: 0.9;
+			}
+
+			#bottombarLobby > p {
+				margin: 0;
+				font-size: max(3vw, 35px);
+				text-shadow: .1em .1em rgb(53, 16, 100);
+			}
+
+			#startLobby {
+				background-color: #3229D6;
+				border: .5vmax solid #241DA3;
+				cursor: pointer;
+			}
+
+			#startLobby:not(.startdisabled):hover, #startLobby:not(.startdisabled):focus {
+				outline: none;
+				animation: starthover 200ms forwards;
+			}
+
+			#startLobby.startdisabled {
+				background-color: #555;
+				border-color: #333;
+				cursor: not-allowed;
+			}
+
+			@keyframes starthover {
+				from {
+					background-color: #3229D6;
+				}
+
+				to {
+					background-color: #433AE7;
+				}
+			}
+
+			#game {
+				background-image: url("cards.png");
+				background-size: 800px;
+				animation: gbgpos 15s linear infinite;
+			}
+
+			@keyframes fadein {
+				from {
+					opacity: 0;
+				}
+
+				to {
+					opacity: 1;
+				}
+			}
+
+			@keyframes fadeout {
+				from {
+					opacity: 1;
+				}
+
+				to {
+					opacity: 0;
+				}
+			}
+
+			#game .opacitydiv {
+				opacity: 0.7;
+			}
+
+			#game *:not(.opacitydiv, #alertGame, #optionsGame, .deck) {
+				z-index: 1;
+			}
+
+			@keyframes gbgpos {
+				from {
+					background-position: 800px 15px;
+				}
+
+				to {
+					background-position: 0 15px;
+				}
+			}
+
+			#mainGame {
+				width: 100%;
+				height: 90%;
+				overflow: auto;
+			}
+
+			.expandcardGame {
+				background-color: #EEE;
+				border: max(.3vmin, 2px) solid black;
+				border-radius: 40%;
+				font-size: max(2vmin, 10px);
+				text-align: center;
+				width: max(4vmin, 20px);
+				height: max(4vmin, 20px);
+				padding: .5vmin .25vmin .25vmin .5vmin;
+				cursor: pointer;
+				position: absolute;
+				bottom: 1.2vmax;
+				right: 1.2vmax;
+			}
+
+			.cardGame.black .expandcardGame {
+				border-color: white;
+				color: white;
+				background-color: #333;
+			}
+
+			.expandcardGame:hover, .expandcardGame:focus {
+				animation: grayhover 250ms forwards;
+				outline: none;
+			}
+
+			.cardGame.black .expandcardGame:hover, .cardGame.black .expandcardGame:focus {
+				animation: lightgrayhover 250ms forwards;
+			}
+
+			@keyframes grayhover {
+				to {
+					background-color: #D2D2D2;
+				}
+			}
+
+			@keyframes lightgrayhover {
+				to {
+					background-color: #666;
+				}
+			}
+
+			.expandcardGame i {
+				font-weight: 900;
+			}
+
+			#maincardconGame {
+				height: 100%;
+				background: transparent;
+				display: flex;
+				flex-wrap: wrap;
+				justify-content: space-evenly;
+				align-items: center;
+				gap: 0;
+				perspective: 800px;
+			}
+
+			#deckGame {
+				width: 100%;
+				height: 40vh;
+				padding: 1vmax 0;
+				background-color: rgb(82, 29, 163);
+				border-top: 1.5vh solid rgb(63, 21, 128);
+				position: absolute;
+				top: 90vh;
+				text-align: center;
+				z-index: 2;
+			}
+
+/*			#deckGame:hover {
+				animation: opendeck 300ms forwards;
+			}*/
+
+			@keyframes opendeck {
+				to {
+					overflow: scroll;
+					top: 57vh;
+				}
+			}
+
+			.cardGame {
+				display: inline-block;
+				margin: 1.5vmin;
+				width: 18vw;
+				height: min(30vh, 25vw);
+				background-color: white;
+				border: max(.45vmax, 3px) solid black;
+				border-radius: 3vmin;
+				padding: max(2vmin, 10px);
+				cursor: grab;
+				overflow-wrap: anywhere;
+				overflow: hidden;
+				font-family: "Helvetica Neue Bold";
+				font-size: max(2.5vmax, 5px);
+				text-align: left;
+				position: relative;
+			}
+
+			#drawwhitecarddivGame {
+				display: inline-block;
+				margin: 1.5vmin;
+				width: 18vw;
+				height: calc(min(30vh, 25vw) + max(.45vmax, 3px));
+				padding: calc(max(2vmin, 10px) + max(.45vmax, 3px));
+				overflow-wrap: anywhere;
+				overflow: hidden;
+				position: relative;
+				user-select: none;
+			}
+
+			#drawwhitecarddivGame > div {
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				width: 100%;
+				height: 100%;
+			}
+
+			#drawwhitecardGame {
+				border-radius: 100%;
+				border: .9vmax solid rgb(63, 21, 128);
+				background-color: rgb(112, 59, 193);
+				color: white;
+				font-size: min(7vh, 6vw);
+				padding: min(3vh, 2vw);
+				padding-top: min(1vh, .5vw);
+				padding-bottom: min(1vh, .5vw);
+				font-weight: 900;
+				cursor: pointer;
+			}
+
+			#drawwhitecardGame:hover, #drawwhitecardGame:focus {
+				animation: drawwhitehover 200ms forwards;
+				outline: none;
+			}
+
+			@keyframes drawwhitehover {
+				to {
+					background-color: rgb(162, 109, 243);
+				}
+			}
+
+			@keyframes flipcard {
+				from {
+					transform: rotateY(0);
+				}
+
+				to {
+					transform: rotateY(90deg);
+				}
+			}
+
+			@keyframes unflipcard {
+				from {
+					transform: rotateY(270deg);
+				}
+
+				to {
+					transform: rotateY(360deg);
+				}
+			}
+
+			.cardGame.backside .expandcardGame {
+				display: none;
+			}
+
+			#deckGame .cardGame:not(.mobileview):hover, .cardGame.czarview:not(.black, .mobileview):hover {
+				animation: cardhighlight 300ms forwards;
+			}
+
+			#deckGame .cardGame.selected {
+				border-color: #2EB39F;
+				color: #2EB39F;
+			}
+
+			@keyframes cardhighlight {
+				to {
+					border-color: #2EB39F;
+					color: #2EB39F;
+				}
+			}
+
+			.cardGame p {
+				margin: 0;
+			}
+
+			.black {
+				background-color: black;
+				color: white;
+				border-color: gray;
+			}
+
+			.black:not(.deck) {
+				opacity: 0;
+				left: -41.4vw;
+			}
+
+			@keyframes drawcard {
+				from {
+					left: -41.4vw;
+					opacity: 1;
+				}
+
+				to {
+					left: 0;
+					opacity: 1;
+				}
+			}
+
+			@keyframes undrawcard {
+				from {
+					left: 0;
+				}
+
+				to {
+					left: -41.4vw;
+				}
+			}
+
+			.black.czarview:hover {
+				animation: blackcardhighlight 250ms forwards;
+			}
+
+			.deck.czarview:hover {
+				animation: blackdeckhighlight 250ms forwards;
+			}
+
+			.deck {
+				box-shadow: 0.4vmin 0.4vmin black, 0.8vmin 0.8vmin gray, 1.2vmin 1.2vmin black, 1.6vmin 1.6vmin gray;
+				z-index: 2;
+			}
+
+			@keyframes blackcardhighlight {
+				to {
+					border-color: #35CCB5;
+					color: #66FFE8;
+				}
+			}
+
+			@keyframes blackdeckhighlight {
+				to {
+					border-color: #35CCB5;
+					color: #66FFE8;
+					box-shadow: 0.4vmin 0.4vmin black, 0.8vmin 0.8vmin #2EB39F, 1.2vmin 1.2vmin black, 1.6vmin 1.6vmin #2EB39F;
+				}
+			}
+
+			#submitGame {
+				position: absolute;
+				top: 2vmax;
+				left: 2vmax;
+				color: white;
+				text-shadow: 0.1em 0.1em black;
+				background-color: #007AE6;
+			}
+
+			#submitGame:hover, #submitGame:focus {
+				animation: submitGamehover 250ms forwards;
+			}
+
+			@keyframes submitGamehover {
+				to {
+					background-color: #47A3F5;
+				}
+			}
+
+			/* #paddingGame {
+				width: 100%;
+				height: 10vh;
+				overflow: hidden;
+			} */
+
+			#alertGame {
+				z-index: 2;
+				position: fixed;
+				background-color: rgb(82, 29, 163);
+				border-bottom: 1.5vh solid rgb(63, 21, 128);
+				border-right: 1.5vh solid rgb(63, 21, 128);
+				text-shadow: .07em .07em rgb(53, 16, 100);
+				color: white;
+				font-size: max(6vmin, 3vmax);
+				padding: 2vh 2vw;
+				left: -150%;
+				animation: 700ms cubic-bezier(.25, .5, .35, 1) forwards;
+			}
+
+			@keyframes alertslidein {
+				to {
+					left: 0;
+				}
+			}
+
+			@keyframes alertslideout {
+				from {
+					left: 0;
+				}
+
+				to {
+					left: -150%;
+				}
+			}
+
+			#alerttxtGame {
+				margin: 0;
+				overflow: hidden;
+			}
+
+			#optionsGame {
+				background-color: #4589FF;
+				border-radius: 100%;
+				color: white;
+				text-shadow: 0.05em 0.05em black;
+				font-size: max(4vmax, 10px);
+				font-weight: 900;
+				padding: .1vmax 1.1vmax .8vmax;
+				position: absolute;
+				top: 2vmax;
+				right: 2vmax;
+				z-index: 3;
+				overflow: hidden;
+			}
+
+			#optionsGame:hover, #optionsGame:focus {
+				animation: endhover 250ms forwards;
+			}
+
+			@keyframes endhover {
+				to {
+					background-color: #67ABFF;
+					font-size: max(5.5vmax, 15px);
+					padding: 0 1.3vmax 1vmax;
+				}
+			}
+
+			#endGame {
+				font-size: max(1.5vmax, 15px);
+				padding: .7vmin 1.3vmin;
+				border: 2px solid black;
+				border-radius: 10px;
+			}
+
+			#endGame:not(.hostview) {
+				display: none;
+			}
+
+			#namelistGame {
+				max-height: 40vh;
+				overflow: auto;
+				border: 3px solid black;
+				border-radius: 15px;
+				padding: 10px;
+			}
+
+			#namelistGame li {
+				height: fit-content;
+				border: 3px solid #50aad9;
+				border-radius: 10px;
+				background-color: #e0f5ff;
+				padding: .5vmax .7vmax;
+				user-select: none;
+			}
+
+			#namelistGame li.hostview {
+				cursor: pointer;
+			}
+
+			#game.endscreen {
+				width: 100vw;
+				height: 100vh;
+				justify-content: space-evenly;
+				align-items: center;
+				align-content: center;
+			}
+
+			#leadconGame {
+				display: flex;
+				align-items: flex-end;
+				width: 70vw;
+				height: 80vh;
+				opacity: 0;
+			}
+
+			#leadconGame > div {
+				width: calc(100% / 3);
+				background-color: rgb(82, 29, 163);
+				border: max(1vmin, 6px) solid rgb(63, 21, 128);
+				position: relative;
+				display: inline-block;
+			}
+
+			@keyframes lead1 {
+				from {
+					height: 0;
+				}
+
+				to {
+					height: 75%;
+				}
+			}
+
+			@keyframes lead2 {
+				from {
+					height: 0;
+				}
+
+				to {
+					height: 50%;
+				}
+			}
+
+			@keyframes lead3 {
+				from {
+					height: 0;
+				}
+
+				to {
+					height: 25%;
+				}
+			}
+
+			.award1, .award2 {
+				width: min(5vw, 7vh);
+				height: min(5vw, 7vh);
+			}
+
+			.award_1, .award_2 {
+				width: min(5.88vw, 8.23vh);
+				height: min(5.88vw, 8.23vh);
+			}
+
+			#lead1Game .award1, #lead1Game .award2 {
+				background-color: gold;
+			}
+
+			#lead1Game .award_1, #lead1Game .award_2 {
+				background-color: #CC9300;
+			}
+
+			#lead2Game .award1, #lead2Game .award2 {
+				background-color: #CCC;
+			}
+
+			#lead2Game .award_1, #lead2Game .award_2 {
+				background-color: #999;
+			}
+
+			#lead3Game .award1, #lead3Game .award2 {
+				background-color: #c37b3c;
+			}
+
+			#lead3Game .award_1, #lead3Game .award_2 {
+				background-color: #9d3f08;
+			}
+
+			.award2 {
+				display: flex;
+				justify-content: center;
+				align-content: center;
+				align-items: center;
+			}
+
+			.award2 span {
+				font-size: 4vmin;
+				transform: rotate(315deg);
+				font-family: "Josefin Sans";
+				color: white;
+				text-shadow: .08em .08em black;
+			}
+
+			.award2, .award_2 {
+				transform: rotate(45deg);
+			}
+
+			.award1 {
+				margin: auto;
+				top: max(-5.45vw, -7.63vh);
+			}
+
+			.award_1 {
+				margin: auto;
+				top: min(2.5vw, 3.5vh);
+			}
+
+			.award_1, .award_2, .award1, .award2 {
+				position: relative;
+			}
+
+			.pointsGame, .nameGame {
+				position: absolute;
+				width: 100%;
+				text-align: center;
+				color: white;
+				margin: .5vw 0;
+			}
+
+			.pointsGame {
+				bottom: 0;
+				font-family: "Roboto Slab";
+				font-size: min(2vmax, 5vmin);
+				overflow-wrap: break-word;
+			}
+
+			.nameGame {
+				font-family: "Josefin Sans";
+				font-size: min(3vmax, 7vmin);
+				top: max(-4.5vmax, -14vmin);
+				overflow: hidden;
+			}
+
+			/*-----------------
+				Other stuff
+			-----------------*/
+
+			@font-face{
+				font-family: "Helvetica Neue Bold";
+				src: url(https://font.download/cdn/webfont/helvetica-neue-5/HelveticaNeueBold.woff) format("woff");
+			}
+
+			/*--------------------
+				@media queries
+			--------------------*/
+
+			@media (max-width: 750px) {
+				#hostLobby {
+					display: none;
+				}
+
+				#hostnameLobby {
+					font-size: max(8vw, 30px);
+				}
+			}
+
+			@media (max-width: 500px) {
+				#topbarLobby {
+					justify-content: space-around;
+				}
+
+				#bottombarLobby > p {
+					font-size: max(4vw, 20px);
+				}
+
+				#hostdivLobby {
+					display: none;
+				}
+
+				.cardGame {
+					font-size: max(2vmax, 3px);
+				}
+			}
+
+			@media (max-width: 115vh) {
+				#alertGame {
+					width: 100%;
+					left: initial;
+					right: initial;
+					top: -100%;
+					animation-duration: 600ms;
+				}
+
+				@keyframes alertslidein {
+					from {
+						top: -20vh;
+					}
+
+					to {
+						top: 0;
+					}
+				}
+
+				@keyframes alertslideout {
+					from {
+						top: 0;
+					}
+
+					99% {
+						top: -22vh;
+					}
+
+					to {
+						top: -100%;
+					}
+				}
+			}
+		</style>
+	</head>
+	<body style="height: 100% !important;">
+		<div style="display: flex;" class="con" id="main">
+			<h1 class="maintitle">aCrsd giantsA ytainmH</h1>
+			<button class="btn elemn" id="joinMain">Join Game</button>
+			<button class="btn elemn" id="createMain" onclick="changeScreen('create')">Create Game</button>
+			<button class="btn elemn" id="submitMain" onclick="changeScreen('submit')">Submit Entries</button>
+			<p id="creditsMain">made by Rishan</p>
+		</div>
+		<div class="con" id="create">
+			<h1 class="maintitle">Create Game</h1>
+			<input class="elemn inp" id="roundsCreate" placeholder="# of rounds" type="number" min="1" step="1">
+			<div class="conrow checkboxrow" data-box-id="ffCreate">
+				<div class="checkbox" id="ffCreate" data-onoroff="off" tabindex="0">
+					<span class="checkboxcheck">&#10004;</span>
+				</div>
+				<p id="fflabelCreate">Include NSFW/18+ cards</p>
+			</div>
+			<div class="conrow">
+				<button class="elemn btn back" id="backCreate" onclick="changeScreen('main')"><-- Back</button>
+				<button class="btn elemn" id="createCreate">Create</button>
+			</div>
+		</div>
+		<div class="con" id="submit">
+			<h1 class="maintitle">Submit entries</h1>
+			<select class="elemn" id="cardtypeSubmit">
+				<option value="black">Black card</option>
+				<option value="white">White card</option>
+			</select>
+			<p id="descSubmit">Black cards are question cards. Either type in a question or a fill-in-the-blank statement that can be filled in with nouns (or verbs acting as nouns). Use an asterisk (*) to represent a "blank."</p>
+			<textarea class="elemn textbox" id="entrySubmit"></textarea>
+			<p id="charactercountSubmit">0/100</p>
+			<div class="conrow checkboxrow" data-box-id="ffSubmit">
+				<div class="checkbox" id="ffSubmit" data-onoroff="off" tabindex="0">
+					<span class="checkboxcheck">&#10004;</span>
+				</div>
+				<p id="fflabelSubmit">NSFW/18+</p>
+			</div>
+			<div class="conrow">
+				<button class="elemn btn back" id="backSubmit" onclick="changeScreen('main')"><--&nbsp;Back</button>
+				<button class="elemn btn" id="submitSubmit">Submit</button>
+			</div>
+		</div>
+		<div class="gamecon" id="lobby">
+			<div class="opacitydiv"></div>
+
+			<div id="topbarLobby">
+				<div id="hostdivLobby">
+					<p id="hostLobby">Host: </p>
+					<p id="hostnameLobby"></p>
+				</div>
+				<div id="gamecodedivLobby">
+					<p id="gamecodeLobby">Game Code</p>
+					<p id="codeLobby">______</p>
+				</div>
+			</div>
+			<div id="playerlistdivLobby">
+				<ul id="playerlistLobby"></ul>
+			</div>
+			<div id="bottombarLobby">
+				<p>Minimum of 3 players required to start</p>
+				<button class="elemn" id="startLobby">Start</button>
+			</div>
+		</div>
+		<div class="gamecon" id="game">
+			<div class="opacitydiv"></div>
+
+			<button class="elemn btn" id="optionsGame">&#9776;</button>
+
+			<div id="alertGame">
+				<p id="alerttxtGame"></p>
+			</div>
+			<div id="mainGame">
+				<div id="maincardconGame">
+					<div class="cardGame black backside deck">
+						<p></p>
+					</div>
+					<div class="cardGame black backside" data-cardtext="">
+						<button class="expandcardGame" tabindex="-1"><i class="fa fa-external-link"></i></button>
+						<p></p>
+					</div>
+				</div>
+			</div>
+			<button class="elemn btn invisible" id="submitGame">Submit cards</button>
+			<div id="deckGame" tabindex="-1">
+				<div id="drawwhitecarddivGame">
+					<div>
+						<button id="drawwhitecardGame">+</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div id="load">
+			<div class="loader"></div>
+			<div class="loader animatedloader"></div>
+		</div>
+	</body>
+	<script type="module">
+		import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
+		import { getDatabase, ref, get, set, child, update, remove, onValue } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-database.js";
+
+
+		const firebaseConfig = {
+			apiKey: "AIzaSyAj9Tt_KrcL6x3M2JYXxleSsrQksjyy60Q",
+			authDomain: "cards-against-humanity-f5592.firebaseapp.com",
+			databaseURL: "https://cards-against-humanity-f5592-default-rtdb.firebaseio.com",
+			projectId: "cards-against-humanity-f5592",
+			storageBucket: "cards-against-humanity-f5592.firebasestorage.app",
+			messagingSenderId: "783611533565",
+			appId: "1:783611533565:web:31af645aeb582faa500694"
+		};
+
+		const app = initializeApp(firebaseConfig);
+		const db = getDatabase(app);
+
+		// ----------
+		// Variables
+		// ----------
+
+		// Main screen elements
+
+		let joinMain = document.getElementById("joinMain");
+		let createMain = document.getElementById("createMain");
+		let submitMain = document.getElementById("submitMain");
+		let backMain = document.getElementById("backMain");
+
+		// Create screen elements
+
+		let roundsCreate = document.getElementById("roundsCreate");
+		let ffCreate = document.getElementById("ffCreate");
+		let createCreate = document.getElementById("createCreate");
+		let backCreate = document.getElementById("backCreate");
+
+		// Submit screen elements
+
+		let cardtypeSubmit = document.getElementById("cardtypeSubmit");
+		let descSubmit = document.getElementById("descSubmit");
+		let entrySubmit = document.getElementById("entrySubmit");
+		let charactercountSubmit = document.getElementById("charactercountSubmit");
+		let ffSubmit = document.getElementById("ffSubmit");
+		let submitSubmit = document.getElementById("submitSubmit");
+		let backSubmit = document.getElementById("backSubmit");
+
+		// Lobby screen elements
+
+		let lobby = document.getElementById("lobby");
+		let hostnameLobby = document.getElementById("hostnameLobby");
+		let codeLobby = document.getElementById("codeLobby");
+		let playerlistLobby = document.getElementById("playerlistLobby");
+		let startLobby = document.getElementById("startLobby");
+
+		// Game screen elements
+
+		let game = document.getElementById("game");
+		let optionsGame = document.getElementById("optionsGame");
+		let maincardconGame = document.getElementById("maincardconGame");
+		let deckGame = document.getElementById("deckGame");
+		let alerttxtGame = document.getElementById("alerttxtGame");
+		let blackdeckGame = document.querySelector(".black.deck");
+		let blackcardGame = document.querySelector(".black:not(.deck)");
+		let drawwhitecardGame = document.getElementById("drawwhitecardGame");
+		let submitGame = document.getElementById("submitGame");
+
+		// Core variables
+
+		let mobile = WURFL.is_mobile;
+
+		let currscreen = "main";
+		let myname;
+		let gamecode;
+		let playernames/* = ["Rishan1", "goon1", "goon2"]*/;
+		let firstczarstats/* = ["goon1", 1]*/;
+		let currczarstats/* = ["goon1", 1]*/;
+		let ishost = false;
+		let localgamedata;
+			let finalgamedata;
+		let globalgamedata;
+		let gamestatus;
+		let gamehasended = false;
+
+		let playercheck;
+
+		let selectallcards = "#maincardconGame .cardGame:not(.black)";
+
+		// Other variables
+
+			// animation control
+
+			let changingScreen = false;
+
+		let blackcardid;
+		// mywhitecards is in terms of globalgamedata ids
+		let mywhitecards = [];
+		// selectedwhitecards is in terms of mywhitecards
+		let selectedwhitecards = [];
+		let hassubmittedthisround = false;
+		let dontshowtutorial = [false, false];
+
+		// Function definitions
+
+		let saveData;
+		let removeData;
+
+		let hideLoader;
+		let showLoader;
+		let showAlert;
+		let hideAlert;
+
+		let updateToGameStatus;
+		let updateGameStatus;
+		let generalGameUpdate;
+
+		let convertcolorform;
+		let generatenewcolors;
+
+		let updateCardSides;
+		let updateCardsInDeck;
+		let drawcard;
+		let flipcard;
+		let updatedrawwhitecardvisibility;
+		let endgame;
+		let kickplayer;
+
+		// Database functions
+
+		saveData = (targetkey, targetvalue) => {
+			set(ref(db, targetkey), targetvalue);
+		}
+
+		removeData = (targetkey) => {
+			set(ref(db, targetkey), null);
+		}
+
+		updateGameStatus = (newstatus) => {
+			set(ref(db, "runninggames/" + gamecode + "/status/gamestatus"), newstatus);
+			localgamedata.status.gamestatus = newstatus;
+		}
+
+		/*
+		get(child(ref(db), ---------key---------)).then((value) => {
+			value = value.val();
+			
+
+		});
+		onValue(ref(db, ---------key---------), (snapshot) => {
+			snapshot = snapshot.val();
+
+			
+		});
+		*/
+
+// document.querySelectorAll(".con").forEach((currcon) => {
+// 	currcon.style.display = "none";
+// });
+
+// document.getElementById("game").style.display = "flex";
+// document.body.classList.add("gamescreenactive");
+
+		// -----------------
+		// Website Function
+		// -----------------
+
+		get(child(ref(db), "runninggames")).then((allrunninggames) => {
+			allrunninggames = allrunninggames.val() === null ? [] : allrunninggames.val();
+
+			Object.keys(allrunninggames).forEach(e => {
+				if (!allrunninggames[e].status.running) {
+					removeData("runninggames/" + e);
+				} else {
+					saveData("runninggames/" + e + "/status/running", false);
+				}
+			});
+		});
+
+// gamecode = "Q02U3W";
+
+
+// onValue(ref(db, "runninggames/" + gamecode), (snapshot) => {
+// 				localgamedata = snapshot.val();
+// 				generalGameUpdate(localgamedata);
+// 			});
+
+
+// setTimeout(() => {
+// onValue(ref(db, "runninggames/" + gamecode + "/players/" + myname), (snapshot) => {
+// 				if (snapshot.val() !== null) {
+// 					if (!(snapshot.val()).ispresent) saveData("runninggames/" + gamecode + "/players/" + myname + "/ispresent", true);
+// 				} else {
+// 					Swal.fire({
+// 						title: "You have been disconnected",
+// 						html: "You have been disconnected from the game. This was either because of an awful internet connection, or because you got kicked. The page will reload in 5 seconds. &#175;\\_(&#12484;)_/&#175;",
+// 						icon: "info"
+// 					}).then(result => {
+// 						setTimeout(() => {location.reload()}, 5000);
+// 					});
+// 				}
+// 			});
+// }, 2000);
+
+
+// setInterval(() => {
+// 						window.scrollTo(0, 0);
+// 					}, 1);
+
+
+// setTimeout(() => {
+// onValue(ref(db, "runninggames/" + gamecode + "/status/gamestatus"), (snapshot) => {
+// 						updateToGameStatus(snapshot.val() === null ? "" : snapshot.val());
+// 					});
+// onValue(ref(db, "runninggames/" + gamecode + "/status/submittedwhitecards"), (snapshot) => {
+// 						if (snapshot.val() !== null) {
+// 							snapshot = snapshot.val();
+// 							let newwhitecards = "";
+// 							for (let i in snapshot) {
+// 								newwhitecards += `<div class="cardGame backside" onclick='revealwhitecard("${snapshot[i].submitter.replace(/\"/g, "\″")}");choosewinner("${snapshot[i].submitter.replace(/\"/g, "\″")}");' data-cardid="${i}" data-submitter="${snapshot[i].submitter.replace(/\"/g, "\″")}" data-cardtext="${snapshot[i].content.replace(/\"/g, "\″")}">
+// 													<button class="expandcardGame" tabindex="-1"><i class="fa fa-external-link"></i></button>
+// 													<p>Cards Against Humanity</p>
+// 												</div>`;
+// 							}
+// 							document.querySelectorAll(selectallcards).forEach(e => {
+// 								e.remove();
+// 							});
+// 							maincardconGame.innerHTML += newwhitecards;
+// 							updateCardSides();
+// 							if (snapshot.length == (Object.keys(localgamedata.players).length - 1) * Math.max(globalgamedata.blackcards[localgamedata.status.shownblackcardid].content.split("*").length - 1, 1) && gamestatus == "czarisrevealing") {
+// 								updateGameStatus("reactions");
+// 							}
+// 						} else {
+// 							document.querySelectorAll(selectallcards).forEach((e, index) => {
+// 								setTimeout(() => {fadeElement(e, 1500);}, 500 / (document.querySelectorAll(selectallcards).length - 1) * index);
+// 							});
+// 						}
+// 					});
+// },500);
+
+
+// get(child(ref(db), "globalgamedata")).then((value) => {
+// 				globalgamedata = value.val();
+// 			});
+
+
+
+		// General functions
+
+		changeScreen = (screenName) => {
+			if (["main", "create", "submit"].includes(screenName) && !changingScreen) {
+				changingScreen = true;
+				document.body.style.perspective = "800px";
+				document.querySelectorAll(".con").forEach((currcon) => {
+					currcon.style.animation = "flip 300ms ease-in 0s 1 normal forwards running";
+				});
+
+				setTimeout(() => {
+					currscreen = screenName;
+					document.querySelectorAll(".con").forEach((currcon) => {
+						currcon.style.display = "none";
+					});
+
+					document.getElementById(screenName).style.display = "flex";
+					document.getElementById(screenName).style.animation = "unflip 300ms ease-out 0s 1 normal forwards running";
+					setTimeout(() => {
+						document.querySelectorAll(".con").forEach((currcon) => {
+							currcon.style.animation = "";
+							document.body.style.perspective = "";
+						});
+						changingScreen = false;
+					}, 300);
+				}, 300);
+			}
+		}
+
+		document.querySelectorAll(".checkboxrow").forEach(e => {
+			e.onclick = () => {
+				let targetcheckbox = document.getElementById(e.dataset.boxId);
+				let targetcheckboxspan = document.querySelector("#" + e.dataset.boxId + " span");
+				if (targetcheckbox.dataset.onoroff == "on") {
+					targetcheckboxspan.style.display = "none";
+					targetcheckbox.dataset.onoroff = "off";
+				} else {
+					targetcheckboxspan.style.display = "inline";
+					targetcheckbox.dataset.onoroff = "on";
+				}
+			}
+		});
+
+		function updateMobileview() {
+			if (mobile) {
+				document.querySelectorAll("body *, body").forEach(e => {
+					e.classList.add("mobileview");
+				});
+			}
+		}
+
+		function fadeElement(e, dur = 1000) {
+			e.style.animation = `fadeout ${dur}ms forwards`;
+			setTimeout(() => {e.remove();}, dur);
+		}
+
+		function rand(lower, upper) {
+			let lowerandupper = [Math.min(lower, upper), Math.max(lower, upper)];
+			lower = lowerandupper[0];
+			upper = lowerandupper[1];
+			return (Math.floor(Math.random() * (upper - lower + 1) + lower));
+		}
+
+		// Loader
+
+		showLoader = () => {
+			document.getElementById("load").style.display = "flex";
+			document.querySelectorAll("*").forEach((e) => {e.tabIndex = -1;});
+		}
+
+		hideLoader = () => {
+			document.getElementById("load").style.display = "none";
+			document.querySelectorAll("*").forEach((e) => {e.removeAttribute("tabindex")});
+		}
+
+		// Main screen
+
+		joinMain.onclick = () => {
+			Swal.fire({
+				title: "Enter join code",
+				input: "text",
+				inputLabel: "Ask your game host for the join code and enter below",
+				inputPlaceholder: "G7DSH0",
+				inputValidator: (inpcode) => {
+					showLoader();
+					inpcode = inpcode.toUpperCase().split(" ").join("");
+
+					get(child(ref(db), "runninggames/" + inpcode)).then((fetchedcode) => {
+						fetchedcode = fetchedcode.val();
+						hideLoader();
+
+						if (fetchedcode === null || inpcode == "") {
+							Swal.fire({
+								title: "Invalid Game Code",
+								text: `This code does not exist. ${Math.random() > .5 ? "Check your spelling" : "Nice guess"}, loser.`,
+								icon: "warning"
+							});
+						} else {
+							if (!fetchedcode.status.started) {
+								Swal.fire({
+									title: "Enter name",
+									input: "text",
+									inputLabel: "Enter name below. Make sure it is appropriate!!1!",
+									inputPlaceholder: "John Doe",
+									inputValidator: (name) => {
+										if (name == "" || name.length > 100) {
+											Swal.fire({
+												title: "Invalid Name",
+												html: name == "" ? "At least enter <i>some</i> name!" : `"${name}" is too damn long! 100 character maximum!`,
+												icon: "warning"
+											});
+										} else {
+											if (!Object.keys(fetchedcode.players).includes(name)) {
+												showLoader();
+
+												saveData("runninggames/" + inpcode + "/players/" + name, {
+													points: 0,
+													ispresent: true
+												});
+
+												gamecode = inpcode;
+												myname = name;
+
+												get(child(ref(db),"runninggames/" + gamecode)).then((value) => {
+													localgamedata = value.val();
+													openLobby(ishost);
+
+													hideLoader();
+												});
+
+												onValue(ref(db, "runninggames/" + gamecode + "/status/started"), (snapshot) => {
+													if (snapshot.val())
+														openGame(ishost);
+												});
+											} else {
+												Swal.fire({
+													title: "Unable to join",
+													text: "This name is already taken. What are you, some kind of doppelgänger?",
+													icon: "warning"
+												});
+											}
+										}
+									}
+								});
+							} else {
+								Swal.fire({
+									title: "Unable to join",
+									text: "Too late, the game has already been started. How does it feel to be left in the dust?",
+									icon: "error"
+								});
+							}
+						}
+					});
+				}
+			});
+		}
+
+		// Create screen
+
+		roundsCreate.onblur = () => {
+			roundsCreate.value = roundsCreate.value == "" ? "" : Math.max(Math.abs(Math.round(roundsCreate.value)), 1);
+		}
+
+		function generateGameCode(length) {
+			let returnedcode = "";
+
+			for (let i = 0; i < length; i++) {
+				returnedcode += "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890".charAt(Math.round(Math.random() * 35));
+			}
+
+			return returnedcode;
+		}
+
+		createCreate.onclick = () => {
+			if (roundsCreate.value != "") {
+				Swal.fire({
+					title: "Enter name",
+					input: "text",
+					inputLabel: "Enter name below. Make sure it is appropriate!!1!",
+					inputPlaceholder: "John Doe",
+					inputValidator: (name) => {
+						if (name == "" || name.length > 100) {
+							Swal.fire({
+								title: "Invalid Name",
+								html: name == "" ? "At least enter <i>some</i> name!" : `"${name}" is too damn long! 100 character maximum!`,
+								icon: "warning"
+							});
+						} else {
+							showLoader();
+
+							myname = name;
+
+							get(child(ref(db), "runninggames")).then((runninggames) => {
+								runninggames = runninggames.val() === null ? [] : Object.keys(runninggames.val());
+								
+								let newcode = generateGameCode(6);
+
+								while (runninggames.includes(newcode)) {
+									newcode = generateGameCode(6);
+								}
+
+								localgamedata = {
+									settings: {
+										rounds: roundsCreate.value,
+										ff: (ffCreate.dataset.onoroff == "on" ? "off" : "on")
+									},
+									status: {
+										started: false,
+										running: true,
+										gamestatus: "",
+										shownblackcardid: "",
+										roundsfinished: 0,
+										firstczar: "",
+										submittedwhitecards: []
+									},
+									players: {
+										[name]:  {
+											points: 0,
+											ispresent: true
+										}
+									},
+									host: name,
+									czar: ""
+								}
+
+								saveData("runninggames/" + newcode, localgamedata);
+
+								gamecode = newcode;
+
+								openLobby(true);
+							});
+						}
+					}
+				});
+			} else {
+				Swal.fire({
+					title: "How many rounds?",
+					text: "A game with 0 rounds isn't very entertaining, don't you think?",
+					icon: "error"
+				});
+			}
+		}
+
+		// Submit screen
+
+		cardtypeSubmit.oninput = () => {
+			if (cardtypeSubmit.value == "black") {
+				descSubmit.innerHTML = "Black cards are question cards. Either type in a question or a fill-in-the-blank statement that can be filled in with nouns (or verbs acting as nouns). Use an asterisk (*) to represent a \"blank.\"";
+			} else {
+				descSubmit.innerHTML = "White cards are response cards. It can be either a noun or a verb acting as a noun.";
+			}
+		}
+
+		entrySubmit.oninput = () => {
+			charactercountSubmit.innerHTML = `${entrySubmit.value.length}/100 characters`;
+			charactercountSubmit.style.color = entrySubmit.value.length > 100 ? "red" : "black";
+		}
+
+		submitSubmit.onclick = () => {
+			if (entrySubmit.value.length <= 100 && entrySubmit.value != "") {
+				if (cardtypeSubmit.value == "black") {
+					if (entrySubmit.value.split("*").length - 1 <= 3) {
+						showLoader();
+						get(child(ref(db), "globalgamedata/blackcards")).then((value) => {
+							let submittedEntry = entrySubmit.value;
+							let submittedFf = ffSubmit.dataset.onoroff;
+
+							entrySubmit.value = "";
+							document.querySelector("#ffSubmit .checkboxcheck").style.display = "none";
+							ffSubmit.dataset.onoroff = "off";
+							charactercountSubmit.innerHTML = "0/100 characters";
+
+							saveData("globalgamedata/blackcards/" + (value.val() === null ? 0 : Object.keys(value.val()).length), {
+								content: submittedEntry,
+								ff: (submittedFf == "on" ? "off" : "on")
+							});
+
+							hideLoader();
+							Swal.fire({
+								title: "Success",
+								text: "Your entry has been added to the database.",
+								icon: "success"
+							});
+						});
+					} else {
+						Swal.fire({
+							title: "Entry has too many * symbols",
+							text: "Chill out with the blanks! 3 is more than enough, you don't need anymore.",
+							icon: "error"
+						});
+					}
+				} else {
+					showLoader();
+					get(child(ref(db), "globalgamedata/whitecards")).then((value) => {
+						let submittedEntry = entrySubmit.value;
+						let submittedFf = ffSubmit.dataset.onoroff;
+
+						entrySubmit.value = "";
+						document.querySelector("#ffSubmit .checkboxcheck").style.display = "none";
+						ffSubmit.dataset.onoroff = "off";
+						charactercountSubmit.innerHTML = "0/100 characters";
+
+						saveData("globalgamedata/whitecards/" + (value.val() === null ? 0 : Object.keys(value.val()).length), {
+							content: submittedEntry,
+							ff: (submittedFf == "on" ? "off" : "on")
+						});
+
+						hideLoader();
+						Swal.fire({
+							title: "Success",
+							text: "Your entry has been added to the database.",
+							icon: "success"
+						});
+					});
+				}
+			} else {
+				Swal.fire({
+					title: "Entry is invalid",
+					text: "Your entry must not be empty. It also must be at most 100 characters. Why else would there be a counter?",
+					icon: "error"
+				});
+			}
+		}
+
+		// Lobby screen
+
+		function openLobby(isHost) {
+			document.querySelectorAll(".con").forEach((currcon) => {
+				currcon.style.display = "none";
+			});
+
+			lobby.style.display = "flex";
+
+			document.body.classList.add("gamescreenactive");
+			codeLobby.innerHTML = gamecode;
+			ishost = isHost;
+
+			onValue(ref(db, "runninggames/" + gamecode + "/players"), (snapshot) => {
+				snapshot = snapshot.val() === null ? [] : Object.keys(snapshot.val());
+
+				if (localgamedata.status.started) {
+					if (!snapshot.includes(currczarstats[0]) && snapshot.length >= 3) Swal.close();
+
+					if (snapshot.length < playernames.length) {
+						let disconnectedplayer = playernames.filter(e => !snapshot.includes(e));
+						Swal.fire({
+							title: `${disconnectedplayer} has disconnected.`,
+							text: disconnectedplayer == currczarstats[0] ? "Since they were the czar for this cycle, it will be skipped and a new czar will be chosen." : "",
+							icon: "info",
+							toast: true,
+							position: "top-end",
+							showConfirmButton: false,
+							timer: 5000,
+							timerProgressBar: true
+						});
+					}
+				}
+
+				playernames = snapshot;
+
+				if (snapshot.length < 3) {
+					if (isHost) {
+						if (!Object.values(startLobby.classList).includes("startdisabled"))
+							startLobby.classList.add("startdisabled");
+						if (localgamedata.status.started) endgame(1588);
+					}
+				} else {
+					if (!localgamedata.status.started) {
+						if (Object.values(startLobby.classList).includes("startdisabled") && isHost) startLobby.classList.remove("startdisabled");
+					} else {
+						if (!snapshot.includes(firstczarstats[0])) {
+							firstczarstats[1] = Math.min(firstczarstats[1], snapshot.length - 1);
+							firstczarstats[0] = playernames[firstczarstats[1]];
+						}
+
+						if (!snapshot.includes(currczarstats[0])) {
+							currczarstats[0] = playernames[currczarstats[1]];
+
+							// reset game for next cycle when czar leaves
+							saveData("runninggames/" + gamecode + "/czar", currczarstats[0]);
+
+							let currgamestage = ["", "czarisdrawing", "czarisrevealing", "reactions", "winnerchoosing"].indexOf(gamestatus);
+
+							setTimeout(() => {
+								updateGameStatus("");
+								removeData("runninggames/" + gamecode + "/status/submittedwhitecards");
+								removeData("runninggames/" + gamecode + "/status/shownwhitecards");
+								removeData("runninggames/" + gamecode + "/status/shownblackcardid");
+								removeData("runninggames/" + gamecode + "/status/winner");
+							}, 2300);
+
+							hideAlert();
+
+							document.querySelectorAll(selectallcards).forEach(e => {
+								fadeElement(e, 1400);
+							});
+
+							setTimeout(() => {
+								blackdeckGame = document.querySelector(".black.deck");
+								blackcardGame = document.querySelector(".black:not(.deck)");
+								resetonclicks();
+
+								if (currgamestage >= 2) flipcard(blackcardGame, "frontside", "");
+
+								if (currgamestage >= 1) {
+									setTimeout(() => {
+											blackcardGame.style.animation = "";
+											blackcardGame.style.animation = "undrawcard 500ms cubic-bezier(0, 0, 0.25, 1) forwards";
+											blackcardGame.style.left = "";
+
+										setTimeout(() => {
+											blackcardGame.style.opacity = "0";
+											blackcardGame.style.animation = "";
+										}, 500);
+									}, 700);
+								}
+							}, 1500);
+						}
+					}
+				}
+
+				if (localgamedata && !localgamedata.status.started) {
+					playerlistLobby.innerHTML = "";
+
+					snapshot.forEach((currname, index) => {
+						playerlistLobby.innerHTML += "<li" + (isHost ? " style='cursor: pointer;' class='strikethroughhover'" : "") + " data-nameid='" + index + "' data-name='" + currname + "'>" + currname + "</li>";
+					});
+
+					document.querySelectorAll("#playerlistLobby li").forEach(e => {
+						e.onclick = () => {
+							if (myname == localgamedata.host && e.dataset.name != myname) kickplayer(e.dataset.name);
+						}
+					});
+				}
+			});
+
+			onValue(ref(db, "runninggames/" + gamecode), (snapshot) => {
+				if (snapshot.val() === null && !finalgamedata) {
+					finalgamedata = localgamedata;
+				}
+				if (finalgamedata) console.log(finalgamedata)
+
+				localgamedata = snapshot.val();
+				generalGameUpdate(localgamedata);
+			});
+
+			// Player presense checking
+
+			onValue(ref(db, "runninggames/" + gamecode + "/players/" + myname), (snapshot) => {
+				if (snapshot.val() !== null) {
+					saveData("runninggames/" + gamecode + "/players/" + myname + "/ispresent", true);
+				} else {
+					if (localgamedata && !gamehasended) {
+						Swal.fire({
+							title: "You have been disconnected",
+							html: "You have been disconnected from the game. This was either because your internet connection is awful, or because you got kicked. The page will reload in 5 seconds. &#175;\\_(&#12484;)_/&#175;",
+							icon: "info"
+						}).then(result => {
+							setTimeout(() => {
+								if (localgamedata) location.reload();
+							}, 5000);
+						});
+					}
+				}
+			});
+
+			onValue(ref(db, "runninggames/" + gamecode + "/status/running"), (snapshot) => {
+				if (snapshot.val() !== null) saveData("runninggames/" + gamecode + "/status/running", true);
+			});
+
+			if (isHost) {
+				hostnameLobby.innerText = myname.length > 15 ? myname.substr(0, 10) + "..." : myname;
+				document.querySelectorAll(".gamecon *").forEach((elemn) => {
+					elemn.classList.add("hostview");
+				});
+				hideLoader();
+
+				playercheck = setInterval(() => {
+					if (localgamedata && !gamehasended) {
+						playernames.forEach(e => {
+							if (!localgamedata.players[e].ispresent) {
+								removeData("runninggames/" + gamecode + "/players/" + e);
+							} else {
+								saveData("runninggames/" + gamecode + "/players/" + e + "/ispresent", false);
+							}
+						});
+					}
+				}, 3500);
+			} else {
+				startLobby.classList.add("startdisabled");
+
+				get(child(ref(db), "runninggames/" + gamecode + "/host")).then((currhostname) => {
+					hostnameLobby.innerText = currhostname.val();
+					hideLoader();
+				});
+
+				playercheck = setInterval(() => {
+					if (localgamedata) {
+						let currentczar = localgamedata.czar;
+
+						if (localgamedata.status.started && myname == currentczar) {
+							if (!localgamedata.players[localgamedata.host].ispresent) {
+								endgame(1721);
+							} else {
+								if (!gamehasended) saveData("runninggames/" + gamecode + "/players/" + localgamedata.host + "/ispresent", false);
+							}
+						}
+					}
+				}, 3500);
+			}
+		}
+
+		startLobby.onclick = () => {
+			if (!Object.values(startLobby.classList).includes("startdisabled")) {
+				openGame(ishost);
+				startLobby.classList.add("startdisabled");
+			}
+		}
+
+		// Game screen
+
+		function openGame(isHost) {
+			let firstczar = Object.keys(localgamedata.players)[rand(0, Object.keys(localgamedata.players).length - 1)];
+			firstczarstats = [firstczar, playernames.indexOf(firstczar)];
+			currczarstats = [firstczar, playernames.indexOf(firstczar)];
+
+			if (isHost) {
+				saveData("runninggames/" + gamecode + "/status/started", true);
+				saveData("runninggames/" + gamecode + "/czar", firstczar);
+				saveData("runninggames/" + gamecode + "/status/firstczar", firstczar);
+			}
+
+			get(child(ref(db), "globalgamedata")).then((value) => {
+				globalgamedata = value.val();
+
+				if (localgamedata.settings.ff) {
+					Object.keys(globalgamedata).forEach(gcardtype => {
+						globalgamedata[gcardtype] = Object.values(globalgamedata[gcardtype]).filter(e => e.ff);
+					});
+				}
+			});
+
+			lobby.style.animation = "zoomout 5s cubic-bezier(1, 0, 1, 0) forwards";
+			setTimeout(() => {
+				document.querySelectorAll(".con, .gamecon").forEach((currcon) => {
+					currcon.style.display = "none";
+				});
+
+				document.querySelectorAll("#game *:not(#game, .opacitydiv)").forEach(elemn => {
+					elemn.style.animation = "fadein 1s forwards";
+				});
+				setTimeout(() => {
+					document.querySelectorAll("#game *:not(#game, .opacitydiv)").forEach(elemn => {
+						elemn.style.animation = "";
+					});
+
+					setInterval(() => {
+						window.scrollTo(0, 0);
+					}, 1);
+
+					onValue(ref(db, "runninggames/" + gamecode + "/status/gamestatus"), (snapshot) => {
+						updateToGameStatus(snapshot.val());
+					});
+
+					onValue(ref(db, "runninggames/" + gamecode + "/status/submittedwhitecards"), (snapshot) => {
+						if (snapshot.val() !== null) {
+							snapshot = snapshot.val();
+							let newwhitecards = "";
+							for (let i in snapshot) {
+								newwhitecards += `<div class="cardGame backside" onclick='revealwhitecard("${snapshot[i].submitter.replace(/\"/g, "\″")}");choosewinner("${snapshot[i].submitter.replace(/\"/g, "\″")}");' data-cardid="${i}" data-submitter="${snapshot[i].submitter.replace(/\"/g, "\″")}" data-cardtext="${snapshot[i].content.replace(/\"/g, "\″")}">
+													<button class="expandcardGame" tabindex="-1"><i class="fa fa-external-link"></i></button>
+													<p>Cards Against Humanity</p>
+												</div>`;
+							}
+							document.querySelectorAll(selectallcards).forEach(e => {
+								e.remove();
+							});
+							maincardconGame.innerHTML += newwhitecards;
+							updateCardSides();
+							if (snapshot.length == (Object.keys(localgamedata.players).length - 1) * Math.max(globalgamedata.blackcards[localgamedata.status.shownblackcardid].content.split("*").length - 1, 1) && gamestatus == "czarisrevealing") {
+								updateGameStatus("reactions");
+							}
+						} else {
+							document.querySelectorAll(selectallcards).forEach((e, index) => {
+								setTimeout(() => {fadeElement(e, 1500);}, 500 / (document.querySelectorAll(selectallcards).length - 1) * index);
+							});
+						}
+					});
+				}, 1000);
+
+				game.style.display = "flex";
+			}, 5500);
+		}
+
+		optionsGame.onclick = () => {
+			let ulfornames = "<ul id='namelistGame'>"
+			Object.keys(localgamedata.players).forEach((currplayername, ind) => {ulfornames += "<li" + (ishost ? " class='hostview strikethroughhover'" : "") + " data-nameid=" + ind + " data-name=" + currplayername + ">" + currplayername + "</li>"});
+			ulfornames += "</ul>";
+
+			Swal.fire({
+				title: "Options",
+				icon: "info",
+				html: `<p>Points: ${localgamedata.players[myname].points}</p><button class="elemn btn ${ishost ? 'hostview' : ''}" id="endGame">End Game</button><div id="playerlistdivGame"><p>Players${ishost ? " (tap to kick)" : ""}:</p>${ulfornames}</div>`
+			});
+			
+			document.getElementById("endGame").onclick = () => {endgame(1824);}
+			document.querySelectorAll("#namelistGame li").forEach(e => {
+				if (localgamedata.host != e.dataset.name) {
+					e.onclick = () => {kickplayer(e.dataset.name);}
+				}
+			});
+		};
+
+		showAlert = (alertname, isspecific) => {
+			if (isspecific === undefined)
+				isspecific = false;
+			alerttxtGame.innerText = !isspecific ? alertname + " is pulling a card." : alertname;
+			document.getElementById("alertGame").style.animationName = "alertslidein";
+		}
+
+		hideAlert = () => {
+			document.getElementById("alertGame").style.animationName = "alertslideout";
+		}
+
+		deckGame.onmouseover = () => {
+			deckGame.style.animation = "opendeck 300ms forwards";
+		}
+
+		deckGame.onmouseout = () => {
+			deckGame.style.animation = "";
+		}
+
+		updateToGameStatus = (currstatus) => {
+			gamestatus = currstatus;
+			if (currstatus || currstatus === "") {
+				switch (currstatus) {
+					case "czarisdrawing":
+						if (myname != localgamedata.czar) {
+							showAlert(localgamedata.czar);
+							drawcard(true);
+						}
+						break;
+					case "czarisrevealing":
+						hassubmittedthisround = false;
+						if (myname != localgamedata.czar) {
+							setTimeout(() => {
+								hideAlert();
+							}, 1500);
+							flipcard(blackcardGame, "backside", globalgamedata.blackcards[localgamedata.status.shownblackcardid].content.replace(/\*/g, "____"));
+						}
+						break;
+					case "reactions":
+						if (myname != localgamedata.czar) {
+							showAlert(localgamedata.czar + " is reacting!", true);
+							setTimeout(() => {hideAlert()}, 3500);
+						} else {
+							Swal.fire({
+								title: "Everyone is done",
+								text: "Everyone has finished submitting their cards. Click them on the board to flip and reveal each submission." + (Math.random() < .2 ? " Surely at least one of them is good. Right?" : ""),
+								icon: "info"
+							});
+						}
+
+						let cardcolors = generatenewcolors(Object.keys(localgamedata.players).length - 1, "2eb39f");
+
+						let playersthisround = Object.keys(localgamedata.players);
+						playersthisround.splice(playersthisround.indexOf(localgamedata.czar), 1);
+
+						setTimeout(() => {
+							playersthisround.forEach((e, ind) => {
+								document.querySelectorAll(selectallcards).forEach(el => {
+									if (el.dataset.submitter == e) {
+										let intervaltimer = 0;
+										let interval = setInterval(() => {
+											el.style.borderColor = "rgb(" + (cardcolors[ind][0] * intervaltimer / 100) + ", " + (cardcolors[ind][1] * intervaltimer / 100) + ", " + (cardcolors[ind][1] * intervaltimer / 100) + ")";
+											el.style.color = "rgb(" + (cardcolors[ind][0] * intervaltimer / 100) + ", " + (cardcolors[ind][1] * intervaltimer / 100) + ", " + (cardcolors[ind][1] * intervaltimer / 100) + ")";
+
+											intervaltimer += 0.1;
+											if (intervaltimer >= 100) clearInterval(interval);
+										}, 1);
+									}
+								});
+							});
+						}, 500);
+						break;
+					case "winnerchoosing":
+						if (myname != localgamedata.czar) {
+							showAlert(localgamedata.czar + " is choosing a winner...", true);
+							setTimeout(() => {hideAlert()}, 4500);
+						} else {
+							Swal.fire({
+								title: "Choose a winner",
+								text: "Now that you have seen all of the submissions, you must select the funniest one. Choose as if your life depended on it.",
+								icon: "info"
+							});
+						}
+						break;
+					default:
+						setTimeout(() => {
+							if (localgamedata) {
+								let tobeusedhtml;
+								if (myname == localgamedata.czar) {
+									if (!dontshowtutorial[0]) {
+										Swal.fire({
+											title: "How to play",
+											icon: "info",
+											html: `<p>You are the czar for this cycle. Click on game elements in the middle to interact with them. It's pretty simple, really.</p><input checked style="cursor: pointer;" type="checkbox" id="dontshowagainGame"><label style="user-select: none; cursor: default; margin-left: 5px;" for="dontshowagainGame">Don't show again</label>`
+										}).then(result => {
+											dontshowtutorial[0] = document.getElementById("dontshowagainGame").checked;
+										});
+									} else {
+										Swal.fire({
+											title: "You are the czar",
+											icon: "info",
+											text: "Draw a card from the deck."
+										});
+									}
+								}
+
+								if (myname != localgamedata.czar && !dontshowtutorial[1]) {
+									Swal.fire({
+										title: "How to play",
+										icon: "info",
+										html: `<p>You are a normal player for this cycle. ${!mobile ? "Hover over your deck" : "Click on your deck"} (the purple part at the bottom) to open it. Click on the purple plus icon to draw a card to build up a deck of at most 12 cards at one time.</p><input checked style="cursor: pointer;" type="checkbox" id="dontshowagainGame"><label style="user-select: none; cursor: default; margin-left: 5px;" for="dontshowagainGame">Don't show again</label>`
+									}).then(result => {
+										dontshowtutorial[1] = document.getElementById("dontshowagainGame").checked;
+									});
+								}
+							}
+						}, localgamedata.status.roundsfinished != 0 || firstczarstats[1] != currczarstats[1] ? 3500 : 500);
+				}
+			}
+		}
+
+		function getRGBvalues(rgbstring) {
+			let rgbvalues = rgbstring.substring(4, rgbstring.length - 1).split(", ");
+			rgbvalues.forEach((e, ind) => {
+				rgbvalues[ind] = Number(e);
+			});
+			return rgbvalues;
+		}
+
+		generalGameUpdate = (currgamedata) => {
+			if (currgamedata !== null) {
+				setTimeout(() => {updateCardSides()}, 300);
+				updateMobileview();
+				let allelemens = document.querySelectorAll("*");
+				if (myname == currgamedata.czar) {
+					allelemens.forEach((elemn) => {
+						elemn.classList.add("czarview");
+					});
+				} else {
+					allelemens.forEach((elemn) => {
+						elemn.classList.remove("czarview");
+					});
+				}
+
+				if (myname != currgamedata.czar && gamestatus == "reactions") {
+					document.querySelectorAll(selectallcards).forEach(e => {
+						flipcard(e, currgamedata.status.shownwhitecards !== undefined ? (currgamedata.status.shownwhitecards[e.dataset.submitter] == "backside" ? "frontside" : "backside") : "frontside");
+					});
+				}
+
+				if (currgamedata.status.winner !== undefined && gamestatus == "winnerchoosing") {
+					let winnerwinner = currgamedata.status.winner;
+					removeData("runninggames/" + gamecode + "/status/winner");
+
+					document.querySelectorAll(selectallcards).forEach((e, i) => {
+						flipcard(e, "frontside");
+						let origcolor = getRGBvalues(e.style.color);
+						setTimeout(() => {
+							let intervaltimer = 0;
+							let interval = setInterval(() => {
+								e.style.color = "rgb(" + (origcolor[0] * (100 - intervaltimer) / 100) + ", " + (origcolor[1] * (100 - intervaltimer) / 100) + ", " + (origcolor[1] * (100 - intervaltimer) / 100) + ")";
+								e.style.borderColor = "rgb(" + (origcolor[0] * (100 - intervaltimer) / 100) + ", " + (origcolor[1] * (100 - intervaltimer) / 100) + ", " + (origcolor[1] * (100 - intervaltimer) / 100) + ")";
+
+								intervaltimer += 0.2;
+								if (intervaltimer >= 100) clearInterval(interval);
+							}, 1);
+							setTimeout(() => {
+								showAlert("Who won?", true);
+								if (e.dataset.submitter != winnerwinner)
+									fadeElement(e, 1000);
+
+								setTimeout(() => {
+									if (e.dataset.submitter == winnerwinner)
+										flipcard(e, "backside");
+
+									if (i == 0) {
+										setTimeout(() => {
+											alerttxtGame.innerText = winnerwinner + " won!";
+											setTimeout(() => {
+												hideAlert();
+												updateGameStatus("");
+												removeData("runninggames/" + gamecode + "/status/submittedwhitecards");
+												removeData("runninggames/" + gamecode + "/status/shownwhitecards");
+												removeData("runninggames/" + gamecode + "/status/shownblackcardid");
+												removeData("runninggames/" + gamecode + "/status/winner");
+
+												blackdeckGame = document.querySelector(".black.deck");
+												blackcardGame = document.querySelector(".black:not(.deck)");
+												resetonclicks();
+
+												setTimeout(() => {
+													flipcard(blackcardGame, "frontside", "");
+													setTimeout(() => {
+														blackcardGame.style.animation = "";
+														blackcardGame.style.animation = "undrawcard 500ms cubic-bezier(0, 0, 0.25, 1) forwards";
+														blackcardGame.style.left = "";
+														setTimeout(() => {
+															blackcardGame.style.opacity = "0";
+															blackcardGame.style.animation = "";
+														}, 500);
+													}, 1000); // After 1 second, places black card back in deck
+												}, 2000); // After 2 seconds, hides black card
+
+												currczarstats[1] = currczarstats[1] + 1;
+												if (currczarstats[1] >= playernames.length) currczarstats[1] = 0;
+												currczarstats[0] = playernames[currczarstats[1]];
+
+												if (myname == localgamedata.host && !gamehasended) {
+													saveData("runninggames/" + gamecode + "/czar", currczarstats[0]);
+												}
+
+												if (currczarstats[1] == firstczarstats[1] && myname == localgamedata.host && !gamehasended) {
+													saveData("runninggames/" + gamecode + "/status/roundsfinished", localgamedata.status.roundsfinished + 1);
+												}
+
+												if (localgamedata.status.roundsfinished == localgamedata.settings.rounds) endgame(2192);
+											}, 3000); // After 3 seconds, resets everything
+										}, 1000); // After 1 second, alerts "[player] won!"
+									}
+								}, 3000); // After 3 seconds, reveals winning cards
+							}, 2000); // After 2 seconds, alerts "Who won?" and takes 1 second to remove all losing cards
+						}, 1500); // After 1.5 seconds, takes .5 seconds to fade all cards to black
+					}); // Starts off by hiding every card
+				}
+			} else {
+				Swal.close();
+				
+				document.querySelectorAll("#game *:not(.opacitydiv)").forEach(e => {
+					fadeElement(e, 5000);
+				});
+				setTimeout(() => {
+					document.querySelector("#game .opacitydiv").remove();
+					document.querySelector("#game").style.background = "black";
+					document.querySelector("#game").style.animation = "";
+				}, 5000);
+
+				document.querySelector("#game").style.animation = "fadeout 5s forwards";
+
+				setTimeout(() => {
+					let playerscores = [];
+
+					Object.keys(finalgamedata.players).forEach((e, index) => {
+						playerscores[index] = [Number(finalgamedata.players[e].points), e];
+					});
+
+					playerscores.sort().reverse();
+
+					// animation
+					game.classList.add("endscreen");
+
+					game.innerHTML = `<div class="opacitydiv"></div>
+									<div id="leadconGame">
+										<div id="lead2Game">
+											<div style="display: none; opacity: 0;" class="award_1">
+												<div class="award_2"></div>
+												<div class="award1">
+													<div class="award2"><span>2nd</span></div>
+												</div>
+											</div>
+											<p style="display: none; opacity: 0;" class="pointsGame">4 points</p>
+											<p style="display: none; opacity: 0;" class="nameGame">Rishan1Rishan2Rishan3Rishan4</p>
+										</div>
+										<div id="lead1Game">
+											<div style="display: none; opacity: 0;" class="award_1">
+												<div class="award_2"></div>
+												<div class="award1">
+													<div class="award2"><span>1st</span></div>
+												</div>
+											</div>
+											<p style="display: none; opacity: 0;" class="pointsGame">5 points</p>
+											<p style="display: none; opacity: 0;" class="nameGame">Rishan</p>
+										</div>
+										<div id="lead3Game">
+											<div style="display: none; opacity: 0;" class="award_1">
+												<div class="award_2"></div>
+												<div class="award1">
+													<div class="award2"><span>3rd</span></div>
+												</div>
+											</div>
+											<p style="display: none; opacity: 0;" class="pointsGame">2 points</p>
+											<p style="display: none; opacity: 0;" class="nameGame">goon 1</p>
+										</div>
+									</div>`;
+					document.querySelector("#game").style.background = "";
+
+					document.querySelector("#lead1Game .pointsGame").innerText = playerscores[0][0] + " point" + (playerscores[0][0] == 1 ? "" : "s");
+					document.querySelector("#lead2Game .pointsGame").innerText = playerscores[1][0] + " point" + (playerscores[1][0] == 1 ? "" : "s");
+					document.querySelector("#lead3Game .pointsGame").innerText = playerscores[2][0] + " point" + (playerscores[2][0] == 1 ? "" : "s");
+					document.querySelector("#lead1Game .nameGame").innerText = playerscores[0][1];
+					document.querySelector("#lead2Game .nameGame").innerText = playerscores[1][1];
+					document.querySelector("#lead3Game .nameGame").innerText = playerscores[2][1];
+
+					document.getElementById("leadconGame").style.animation = "fadein 1s forwards";
+					setTimeout(() => {
+						document.getElementById("lead3Game").style.animation = "lead3 500ms forwards";
+						setTimeout(() => {
+							document.getElementById("lead2Game").style.animation = "lead2 500ms forwards";
+							setTimeout(() => {
+								document.getElementById("lead1Game").style.animation = "lead1 500ms forwards";
+								setTimeout(() => {
+									document.querySelector("#lead3Game .award_1").style.display = "";
+									document.querySelector("#lead3Game .award_1").style.animation = "fadein 500ms forwards";
+									setTimeout(() => {
+										document.querySelector("#lead2Game .award_1").style.display = "";
+										document.querySelector("#lead2Game .award_1").style.animation = "fadein 500ms forwards";
+										setTimeout(() => {
+											document.querySelector("#lead1Game .award_1").style.display = "";
+											document.querySelector("#lead1Game .award_1").style.animation = "fadein 500ms forwards";
+											setTimeout(() => {
+												document.querySelector("#lead3Game .pointsGame").style.display = "";
+												document.querySelector("#lead3Game .pointsGame").style.animation = "fadein 500ms forwards";
+												setTimeout(() => {
+													document.querySelector("#lead2Game .pointsGame").style.display = "";
+													document.querySelector("#lead2Game .pointsGame").style.animation = "fadein 500ms forwards";
+													setTimeout(() => {
+														document.querySelector("#lead1Game .pointsGame").style.display = "";
+														document.querySelector("#lead1Game .pointsGame").style.animation = "fadein 500ms forwards";
+														setTimeout(() => {
+															document.querySelector("#lead3Game .nameGame").style.display = "";
+															document.querySelector("#lead3Game .nameGame").style.animation = "fadein 700ms forwards";
+															setTimeout(() => {
+																document.querySelector("#lead2Game .nameGame").style.display = "";
+																document.querySelector("#lead2Game .nameGame").style.animation = "fadein 700ms forwards";
+																setTimeout(() => {
+																	document.querySelector("#lead1Game .nameGame").style.display = "";
+																	document.querySelector("#lead1Game .nameGame").style.animation = "fadein 700ms forwards";
+																}, 2000);
+															}, 1000);
+														}, 2000);
+													}, 500);
+												}, 500);
+											}, 1000);
+										}, 500);
+									}, 500);
+								}, 1000);
+							}, 500);
+						}, 500);
+					}, 1500);
+				}, 5100);
+			}
+		}
+
+		updateCardSides = () => {
+			document.querySelectorAll(".cardGame").forEach((currcard) => {
+				currcard.dataset.side = Object.values(currcard.classList).includes("frontside") ? "frontside" : "backside";
+
+				if (Object.values(currcard.classList).includes("backside")) {
+					currcard.children[currcard.children.length - 1].innerText = "Cards Against Humanity";
+				} else {
+					currcard.children[currcard.children.length - 1].innerText = currcard.dataset.cardtext;
+				}
+
+				document.querySelectorAll(".expandcardGame").forEach(elemn => {
+					elemn.onclick = () => {
+						event.stopPropagation();
+
+						Swal.fire({
+							title: 'Card Text',
+							icon: 'info',
+							text: elemn.nextElementSibling.innerHTML
+						});
+					}
+				});
+			});
+		}
+
+		drawcard = (override = false) => {
+			if (gamestatus == "" || override) {
+				updateCardSides();
+				blackcardGame.style.animation = "drawcard 500ms cubic-bezier(0, 0, 0.25, 1) forwards";
+				blackcardGame.style.opacity = "1";
+				blackcardGame.style.left = "0";
+				setTimeout(() => {
+					blackcardGame.style.animation = "";
+				}, 500);
+			}
+		}
+
+		flipcard = (flippedcardhtml, fromside, newcardtext) => {
+			if (fromside === undefined)
+				fromside = Object.values(flippedcardhtml.classList).includes("frontside") ? "frontside" : "backside";
+
+			if (newcardtext !== undefined)
+				flippedcardhtml.dataset.cardtext = newcardtext;
+
+			if (Object.values(flippedcardhtml.classList).includes(fromside)) {
+				flippedcardhtml.style.animation = "flipcard 300ms ease-in forwards";
+				flippedcardhtml.dataset.side = fromside == "backside" ? "frontside" : "backside";
+
+				setTimeout(() => {
+					if (fromside == "frontside") {
+						flippedcardhtml.classList.remove("frontside");
+						flippedcardhtml.classList.add("backside");
+					} else {
+						flippedcardhtml.classList.remove("backside");
+						flippedcardhtml.classList.add("frontside");
+					}
+
+					updateCardSides();
+
+					flippedcardhtml.style.animation = "unflipcard 300ms ease-out forwards";
+					setTimeout(() => {
+						flippedcardhtml.style.animation = "";
+					}, 300);
+				}, 300);
+			}
+		}
+
+		function resetonclicks() {
+			blackdeckGame.onclick = () => {
+				if (myname == localgamedata.czar) {
+					drawcard();
+					updateGameStatus("czarisdrawing");
+				}
+			}
+
+			blackcardGame.onclick = () => {
+				if (myname == localgamedata.czar && localgamedata.status.gamestatus == "czarisdrawing") {
+					localgamedata.status.gamestatus == "czarisrevealing";
+					blackcardid = rand(0, globalgamedata.blackcards.length - 1);
+					if (!gamehasended) saveData("runninggames/" + gamecode + "/status/shownblackcardid", String(blackcardid));
+
+					setTimeout(() => {
+						updateGameStatus("czarisrevealing");
+					}, 250);
+
+					flipcard(blackcardGame, "backside", globalgamedata.blackcards[blackcardid].content.replace(/\*/g, "____"));
+				}
+			}
+		}
+
+		resetonclicks();
+
+		function returnWhiteCardNotInDeck() {
+			let newwhitecardid = Math.round(Math.random() * (globalgamedata.whitecards.length - 1));
+			do {
+				newwhitecardid = Math.round(Math.random() * (globalgamedata.whitecards.length - 1));
+				if (!mywhitecards.includes(newwhitecardid)) {
+					return newwhitecardid;
+				}
+			} while (mywhitecards.includes(newwhitecardid));
+			if (!mywhitecards.includes(newwhitecardid)) {
+				return newwhitecardid;
+			}
+		}
+
+		updatedrawwhitecardvisibility = () => {
+			if (mywhitecards.length < 12) {
+				document.getElementById("drawwhitecarddivGame").style.display = "inline-block";
+			} else {
+				document.getElementById("drawwhitecarddivGame").style.display = "none";
+			}
+		}
+
+		updateCardsInDeck = () => {
+			let newdeck = ``;
+			mywhitecards.forEach((currwhitecard, index) => {
+				newdeck += `<div class="cardGame frontside" onclick="selectwhitecard(${index})" data-cardid="${index}" data-cardtext="${globalgamedata.whitecards[currwhitecard].content.replace(/\"/g, "\″")}">
+								<button class="expandcardGame" tabindex="-1"><i class="fa fa-external-link"></i></button>
+								<p></p>
+							</div>`;
+			});
+			newdeck += `<div id="drawwhitecarddivGame">
+							<div>
+								<button id="drawwhitecardGame" onclick="drawwhitecard()">+</button>
+							</div>
+						</div>`;
+
+			drawwhitecardGame = document.getElementById("drawwhitecardGame");
+			deckGame = document.getElementById("deckGame");
+			deckGame.innerHTML = newdeck;
+			updatedrawwhitecardvisibility();
+			updateCardSides();
+			updateMobileview();
+		}
+
+		drawwhitecard = () => {
+			if (mywhitecards.length < 12) {
+				mywhitecards.push(returnWhiteCardNotInDeck());
+				selectedwhitecards = [];
+				submitGame.classList.add("invisible");
+				updateCardsInDeck();
+			}
+		}
+
+		drawwhitecardGame.onclick = () => {drawwhitecard();}
+
+		selectwhitecard = (selectedcardindex) => {
+			if (selectedwhitecards.includes(selectedcardindex)) {
+				selectedwhitecards.splice(selectedwhitecards.indexOf(selectedcardindex), 1);
+				deckGame.children[selectedcardindex].classList.remove("selected");
+			} else {
+				selectedwhitecards.push(selectedcardindex);
+				deckGame.children[selectedcardindex].classList.add("selected");
+			}
+
+			if (selectedwhitecards.length != 0) {
+				submitGame.classList.remove("invisible");
+			} else {
+				submitGame.classList.add("invisible");
+			}
+		}
+
+		submitGame.onclick = () => {
+			if (localgamedata.status.gamestatus == "czarisrevealing") {
+				if (myname != localgamedata.czar) {
+					let reqanswers = Math.max(globalgamedata.blackcards[localgamedata.status.shownblackcardid].content.split("*").length - 1, 1);
+					if (selectedwhitecards.length == reqanswers) {
+						if (!hassubmittedthisround) {
+							hassubmittedthisround = true;
+							let tobesubmittedcards = [];
+							selectedwhitecards.forEach(e => {
+								tobesubmittedcards.push({
+									content: globalgamedata.whitecards[mywhitecards[e]].content,
+									submitter: myname
+								});
+							});
+							saveData("runninggames/" + gamecode + "/status/submittedwhitecards", (localgamedata.status.submittedwhitecards === undefined ? [] : Object.values(localgamedata.status.submittedwhitecards)).concat(tobesubmittedcards));
+							Swal.fire({
+								title: "Succesfully submitted cards",
+								icon: "success",
+								text: "Now you just have to wait for the others to submit their cards. You can see them popping up as they do."
+							});
+							selectedwhitecards.sort().reverse();
+							selectedwhitecards.forEach(e => {
+								mywhitecards.splice(e, 1);
+							});
+							selectedwhitecards = [];
+							updateCardsInDeck();
+							document.querySelectorAll("#deckGame .cardGame").forEach(e => {
+								e.classList.remove("selected");
+							});
+							submitGame.classList.add("invisible");
+						} else {
+							Swal.fire({
+								title: "You have already submitted",
+								icon: "warning",
+								text: "You have already submitted your cards for this round. I guess the dementia is kicking in early for you, huh?"
+							});
+						}
+					} else {
+						Swal.fire({
+							title: "Must submit " + reqanswers + " card" + (reqanswers == 1 ? "" : "s"),
+							icon: "error",
+							text: "The black card shown requires " + reqanswers + " card" + (reqanswers == 1 ? "" : "s") + ". You have " + selectedwhitecards.length + " selected."
+						});
+					}
+				} else {
+					Swal.fire({
+						title: "Cannot submit cards as Czar",
+						icon: "error",
+						text: "The czar (that's you right now) can't submit their cards because they are the one that chooses the winner for the round."
+					});
+				}
+			} else {
+				Swal.fire({
+					title: "Cannot submit cards now",
+					icon: "error",
+					text: "Be a little patient and wait for the next card to show, goldfish attention span lookin' ah"
+				});
+			}
+		}
+
+		revealwhitecard = (targettedsubmitter) => {
+			if (myname == localgamedata.czar && gamestatus == "reactions") {
+				document.querySelectorAll(selectallcards).forEach(e => {
+					if (e.dataset.submitter == targettedsubmitter)
+						flipcard(e);
+				});
+
+				let newshownwhitecards = {};
+				let currshowncards = document.querySelectorAll(selectallcards);
+				Object.keys(localgamedata.players).forEach(e => {
+					for (let i = 0; i < currshowncards.length; i++) {
+					    if (e == currshowncards[i].dataset.submitter) {
+					        newshownwhitecards[e] = currshowncards[i].dataset.side;
+					        break;
+					    }
+					}
+				});
+				if (!gamehasended) saveData("runninggames/" + gamecode + "/status/shownwhitecards", newshownwhitecards);
+
+				if (document.querySelectorAll("#maincardconGame .cardGame[data-side=backside]:not(.black)").length == 0) {
+					setTimeout(() => {
+						if (document.querySelectorAll("#maincardconGame .cardGame[data-side=backside]:not(.black)").length == 0)
+							updateGameStatus("winnerchoosing")
+					}, 500);
+				}
+			}
+		}
+
+		choosewinner = (targettedsubmitter) => {
+			if (myname == localgamedata.czar && gamestatus == "winnerchoosing" && localgamedata.status.winner === undefined) {
+				let submittedentries = [];
+				let submittedentriesstring = "";
+				document.querySelectorAll(selectallcards).forEach(e => {
+					if (e.dataset.submitter == targettedsubmitter)
+						submittedentries.push(e.dataset.cardtext);
+				})
+
+				switch (submittedentries.length) {
+					case 1:
+						submittedentriesstring = submittedentries[0];
+						break;
+					case 2:
+						submittedentriesstring = submittedentries[0] + '" and "' + submittedentries[1];
+						break;
+					default:
+						submittedentries.forEach((e, ind) => {
+							if (ind < submittedentries.length - 1) {
+								submittedentriesstring += e + ", ";
+							} else {
+								submittedentriesstring += "and " + e;
+							}
+						});
+				}
+
+				if (localgamedata.status.winner === undefined) {
+					Swal.fire({
+						title: "Choose as winner?",
+						icon: "question",
+						text: "Do you want to choose \"" + submittedentriesstring + "\" as the winner?",
+						showCancelButton: true,
+						confirmButtonText: "Yes",
+						confirmButtonColor: "#28A745",
+						cancelButtonText: "No, I change my mind",
+						cancelButtonColor: "#D33"
+					}).then((result) => {
+						if (result.isConfirmed && !gamehasended) {
+							saveData("runninggames/" + gamecode + "/status/winner", targettedsubmitter);
+							saveData("runninggames/" + gamecode + "/players/" + targettedsubmitter + "/points", localgamedata.players[targettedsubmitter].points + 1);
+						}
+					});
+				}
+			}
+		}
+
+		generatenewcolors = (amount, unallowedcolors) => {
+			function colorisdifferent(comparedcolor, colorset) {
+				let isdifferent = true;
+				if (colorset === undefined)
+					colorset = [];
+				colorset.forEach(ev => {
+					let e = ev;
+					if (typeof e == "string")
+						e = convertcolorform(e, "rgb");
+					if (typeof comparedcolor == "string")
+						comparedcolor = convertcolorform(comparedcolor, "rgb");
+					if ((Math.abs(comparedcolor[0] - e[0]) + Math.abs(comparedcolor[1] - e[1]) + Math.abs(comparedcolor[2] - e[2])) / 3 <= 48) {
+						isdifferent = false;
+					}
+				});
+				return isdifferent;
+			}
+
+			let newcolor = [Math.random() * 175 + 25, Math.random() * 175 + 25, Math.random() * 175 + 25];
+			let previouscolors = [];
+
+			if (unallowedcolors === undefined) unallowedcolors = [];
+
+			for (let i = 0; i < amount; i++) {
+				let tries = 0;
+				do {
+					newcolor = [Math.random() * 175 + 25, Math.random() * 175 + 25, Math.random() * 175 + 25];
+					tries++;
+				} while (tries < 50 && (!colorisdifferent(newcolor, previouscolors) && !colorisdifferent(newcolor, typeof unallowedcolors == "object" ? unallowedcolors : [unallowedcolors])));
+				previouscolors[i] = newcolor;
+			}
+
+			return previouscolors;
+		}
+
+		convertcolorform = (color, toform) => {
+			let hexcodes = "0123456789ABCDEF";
+			if (toform == "rgb") {
+				color = color.toUpperCase().replaceAll("#", "");
+				if (color.length == 3) {
+					color = color[0] + color[0] + color[1] + color[1] + color[2] + color[2];
+				}
+				return [hexcodes.indexOf(color[0]) * 16 + hexcodes.indexOf(color[1]), hexcodes.indexOf(color[2]) * 16 + hexcodes.indexOf(color[3]), hexcodes.indexOf(color[4]) * 16 + hexcodes.indexOf(color[5])];
+			} else if (toform == "hex") {
+				return hexcodes[Math.floor(color[0] / 16)] + hexcodes[color[0] % 16] + hexcodes[Math.floor(color[1] / 16)] + hexcodes[color[1] % 16] + hexcodes[Math.floor(color[2] / 16)] + hexcodes[color[2] % 16];
+			}
+		}
+
+		endgame = (linw) => {
+			gamehasended = true;
+			if (playercheck) clearInterval(playercheck);
+			removeData("runninggames/" + gamecode);
+		}
+
+		kickplayer = (kickedplayer) => {
+			removeData("runninggames/" + gamecode + "/players/" + kickedplayer);
+		}
+	</script>
+	<script>
+		let changeScreen;
+		let selectwhitecard;
+		let revealwhitecard;
+		let choosewinner;
+		let drawwhitecard;
+	</script>
+</html>
