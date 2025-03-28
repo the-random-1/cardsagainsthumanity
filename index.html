@@ -1736,101 +1736,105 @@
 			ishost = isHost;
 
 			onValue(ref(db, "runninggames/" + gamecode + "/players"), (snapshot) => {
-				snapshot = snapshot.val() === null ? [] : Object.keys(snapshot.val());
+				if (localgamedata) {
+					snapshot = snapshot.val() === null ? [] : Object.keys(snapshot.val());
 
-				if (localgamedata.status.started) {
-					if (!snapshot.includes(currczarstats[0]) && snapshot.length >= 3) Swal.close();
+					if (localgamedata.status.started) {
+						if (!snapshot.includes(currczarstats[0]) && snapshot.length >= 3) Swal.close();
 
-					if (snapshot.length < playernames.length) {
-						let disconnectedplayer = playernames.filter(e => !snapshot.includes(e));
-						Swal.fire({
-							title: `${disconnectedplayer} has disconnected.`,
-							text: disconnectedplayer == currczarstats[0] ? "Since they were the czar for this cycle, it will be skipped and a new czar will be chosen." : "",
-							icon: "info",
-							toast: true,
-							position: "top-end",
-							showConfirmButton: false,
-							timer: 5000,
-							timerProgressBar: true
+						if (snapshot.length < playernames.length) {
+							let disconnectedplayer = playernames.filter(e => !snapshot.includes(e));
+							Swal.fire({
+								title: `${disconnectedplayer} has disconnected.`,
+								text: disconnectedplayer == currczarstats[0] ? "Since they were the czar for this cycle, it will be skipped and a new czar will be chosen." : "",
+								icon: "info",
+								toast: true,
+								position: "top-end",
+								showConfirmButton: false,
+								timer: 5000,
+								timerProgressBar: true
+							});
+						}
+					}
+
+					playernames = snapshot;
+
+					if (snapshot.length < 3) {
+						if (isHost) {
+							if (!Object.values(startLobby.classList).includes("startdisabled"))
+								startLobby.classList.add("startdisabled");
+							if (localgamedata.status.started) endgame(1765);
+						}
+					} else {
+						if (!localgamedata.status.started) {
+							if (Object.values(startLobby.classList).includes("startdisabled") && isHost) startLobby.classList.remove("startdisabled");
+						} else {
+							if (!snapshot.includes(firstczarstats[0])) {
+								firstczarstats[1] = Math.min(firstczarstats[1], snapshot.length - 1);
+								firstczarstats[0] = playernames[firstczarstats[1]];
+							}
+
+							if (!snapshot.includes(currczarstats[0])) {
+								if (currczarstats[1] >= snapshot.length) currczarstats[1] = 0;
+								currczarstats[0] = playernames[currczarstats[1]];
+
+								// reset game for next cycle when czar leaves
+
+								if (myname == localgamedata.host) saveData("runninggames/" + gamecode + "/czar", currczarstats[0]);
+
+								let currgamestage = ["", "czarisdrawing", "czarisrevealing", "reactions", "winnerchoosing"].indexOf(gamestatus);
+
+								setTimeout(() => {
+									updateGameStatus("");
+									removeData("runninggames/" + gamecode + "/status/submittedwhitecards");
+									removeData("runninggames/" + gamecode + "/status/shownwhitecards");
+									removeData("runninggames/" + gamecode + "/status/shownblackcardid");
+									removeData("runninggames/" + gamecode + "/status/winner");
+								}, 2300);
+
+								hideAlert();
+
+								document.querySelectorAll(selectallcards).forEach(e => {
+									fadeElement(e, 1400);
+								});
+
+								setTimeout(() => {
+									blackdeckGame = document.querySelector(".black.deck");
+									blackcardGame = document.querySelector(".black:not(.deck)");
+									resetonclicks();
+
+									if (currgamestage >= 2) flipcard(blackcardGame, "frontside", "");
+
+									if (currgamestage >= 1) {
+										setTimeout(() => {
+												blackcardGame.style.animation = "";
+												blackcardGame.style.animation = "undrawcard 500ms cubic-bezier(0, 0, 0.25, 1) forwards";
+												blackcardGame.style.left = "";
+
+											setTimeout(() => {
+												blackcardGame.style.opacity = "0";
+												blackcardGame.style.animation = "";
+											}, 500);
+										}, 700);
+									}
+								}, 1500);
+							}
+						}
+					}
+
+					if (!localgamedata.status.started) {
+						playerlistLobby.innerHTML = "";
+
+						snapshot.forEach((currname, index) => {
+							playerlistLobby.innerHTML += "<li" + (isHost ? " style='cursor: pointer;' class='strikethroughhover'" : "") + " data-nameid='" + index + "' data-name='" + currname + "'>" + currname + "</li>";
+						});
+
+						document.querySelectorAll("#playerlistLobby li").forEach(e => {
+							e.onclick = () => {
+								if (myname == localgamedata.host && e.dataset.name != myname) kickplayer(e.dataset.name);
+							}
 						});
 					}
-				}
-
-				playernames = snapshot;
-
-				if (snapshot.length < 3) {
-					if (isHost) {
-						if (!Object.values(startLobby.classList).includes("startdisabled"))
-							startLobby.classList.add("startdisabled");
-						if (localgamedata.status.started) endgame(1588);
-					}
-				} else {
-					if (!localgamedata.status.started) {
-						if (Object.values(startLobby.classList).includes("startdisabled") && isHost) startLobby.classList.remove("startdisabled");
-					} else {
-						if (!snapshot.includes(firstczarstats[0])) {
-							firstczarstats[1] = Math.min(firstczarstats[1], snapshot.length - 1);
-							firstczarstats[0] = playernames[firstczarstats[1]];
-						}
-
-						if (!snapshot.includes(currczarstats[0])) {
-							currczarstats[0] = playernames[currczarstats[1]];
-
-							// reset game for next cycle when czar leaves
-							saveData("runninggames/" + gamecode + "/czar", currczarstats[0]);
-
-							let currgamestage = ["", "czarisdrawing", "czarisrevealing", "reactions", "winnerchoosing"].indexOf(gamestatus);
-
-							setTimeout(() => {
-								updateGameStatus("");
-								removeData("runninggames/" + gamecode + "/status/submittedwhitecards");
-								removeData("runninggames/" + gamecode + "/status/shownwhitecards");
-								removeData("runninggames/" + gamecode + "/status/shownblackcardid");
-								removeData("runninggames/" + gamecode + "/status/winner");
-							}, 2300);
-
-							hideAlert();
-
-							document.querySelectorAll(selectallcards).forEach(e => {
-								fadeElement(e, 1400);
-							});
-
-							setTimeout(() => {
-								blackdeckGame = document.querySelector(".black.deck");
-								blackcardGame = document.querySelector(".black:not(.deck)");
-								resetonclicks();
-
-								if (currgamestage >= 2) flipcard(blackcardGame, "frontside", "");
-
-								if (currgamestage >= 1) {
-									setTimeout(() => {
-											blackcardGame.style.animation = "";
-											blackcardGame.style.animation = "undrawcard 500ms cubic-bezier(0, 0, 0.25, 1) forwards";
-											blackcardGame.style.left = "";
-
-										setTimeout(() => {
-											blackcardGame.style.opacity = "0";
-											blackcardGame.style.animation = "";
-										}, 500);
-									}, 700);
-								}
-							}, 1500);
-						}
-					}
-				}
-
-				if (localgamedata && !localgamedata.status.started) {
-					playerlistLobby.innerHTML = "";
-
-					snapshot.forEach((currname, index) => {
-						playerlistLobby.innerHTML += "<li" + (isHost ? " style='cursor: pointer;' class='strikethroughhover'" : "") + " data-nameid='" + index + "' data-name='" + currname + "'>" + currname + "</li>";
-					});
-
-					document.querySelectorAll("#playerlistLobby li").forEach(e => {
-						e.onclick = () => {
-							if (myname == localgamedata.host && e.dataset.name != myname) kickplayer(e.dataset.name);
-						}
-					});
 				}
 			});
 
@@ -1855,11 +1859,11 @@
 							title: "You have been disconnected",
 							html: "You have been disconnected from the game. This was either because your internet connection is awful, or because you got kicked. The page will reload in 5 seconds. &#175;\\_(&#12484;)_/&#175;",
 							icon: "info"
-						}).then(result => {
-							setTimeout(() => {
-								if (localgamedata) location.reload();
-							}, 5000);
 						});
+
+						setTimeout(() => {
+							if (localgamedata) location.reload();
+						}, 5000);
 					}
 				}
 			});
@@ -1877,7 +1881,8 @@
 
 				playercheck = setInterval(() => {
 					if (localgamedata && !gamehasended) {
-						playernames.forEach(e => {
+						let pplayernames = playernames;
+						pplayernames.forEach(e => {
 							if (!localgamedata.players[e].ispresent) {
 								removeData("runninggames/" + gamecode + "/players/" + e);
 							} else {
@@ -1885,7 +1890,7 @@
 							}
 						});
 					}
-				}, 3500);
+				}, 7500);
 			} else {
 				startLobby.classList.add("startdisabled");
 
@@ -1896,17 +1901,15 @@
 
 				playercheck = setInterval(() => {
 					if (localgamedata) {
-						let currentczar = localgamedata.czar;
-
-						if (localgamedata.status.started && myname == currentczar) {
+						if (localgamedata.status.started) {
 							if (!localgamedata.players[localgamedata.host].ispresent) {
-								endgame(1721);
+								endgame(1906);
 							} else {
 								if (!gamehasended) saveData("runninggames/" + gamecode + "/players/" + localgamedata.host + "/ispresent", false);
 							}
 						}
 					}
-				}, 3500);
+				}, 7500);
 			}
 		}
 
@@ -2006,7 +2009,7 @@
 			document.getElementById("endGame").onclick = () => {endgame(1824);}
 			document.querySelectorAll("#namelistGame li").forEach(e => {
 				if (localgamedata.host != e.dataset.name) {
-					e.onclick = () => {kickplayer(e.dataset.name);}
+					e.onclick = () => {if (myname == localgamedata.host) kickplayer(e.dataset.name);}
 				}
 			});
 		};
@@ -2218,12 +2221,14 @@
 												if (currczarstats[1] >= playernames.length) currczarstats[1] = 0;
 												currczarstats[0] = playernames[currczarstats[1]];
 
-												if (myname == localgamedata.host && !gamehasended) {
-													saveData("runninggames/" + gamecode + "/czar", currczarstats[0]);
-												}
+												if (localgamedata) {
+													if (myname == localgamedata.host && !gamehasended) {
+														saveData("runninggames/" + gamecode + "/czar", currczarstats[0]);
+													}
 
-												if (currczarstats[1] == firstczarstats[1] && myname == localgamedata.host && !gamehasended) {
-													saveData("runninggames/" + gamecode + "/status/roundsfinished", localgamedata.status.roundsfinished + 1);
+													if (currczarstats[1] == firstczarstats[1] && myname == localgamedata.host && !gamehasended) {
+														saveData("runninggames/" + gamecode + "/status/roundsfinished", localgamedata.status.roundsfinished + 1);
+													}
 												}
 
 												if (localgamedata.status.roundsfinished == localgamedata.settings.rounds) endgame(2192);
@@ -2431,7 +2436,7 @@
 				if (myname == localgamedata.czar && localgamedata.status.gamestatus == "czarisdrawing") {
 					localgamedata.status.gamestatus == "czarisrevealing";
 					blackcardid = rand(0, globalgamedata.blackcards.length - 1);
-					if (!gamehasended) saveData("runninggames/" + gamecode + "/status/shownblackcardid", String(blackcardid));
+					if (localgamedata && !gamehasended) saveData("runninggames/" + gamecode + "/status/shownblackcardid", String(blackcardid));
 
 					setTimeout(() => {
 						updateGameStatus("czarisrevealing");
@@ -2515,62 +2520,64 @@
 		}
 
 		submitGame.onclick = () => {
-			if (localgamedata.status.gamestatus == "czarisrevealing") {
-				if (myname != localgamedata.czar) {
-					let reqanswers = Math.max(globalgamedata.blackcards[localgamedata.status.shownblackcardid].content.split("*").length - 1, 1);
-					if (selectedwhitecards.length == reqanswers) {
-						if (!hassubmittedthisround) {
-							hassubmittedthisround = true;
-							let tobesubmittedcards = [];
-							selectedwhitecards.forEach(e => {
-								tobesubmittedcards.push({
-									content: globalgamedata.whitecards[mywhitecards[e]].content,
-									submitter: myname
+			if (localgamedata) {
+				if (localgamedata.status.gamestatus == "czarisrevealing") {
+					if (myname != localgamedata.czar) {
+						let reqanswers = Math.max(globalgamedata.blackcards[localgamedata.status.shownblackcardid].content.split("*").length - 1, 1);
+						if (selectedwhitecards.length == reqanswers) {
+							if (!hassubmittedthisround) {
+								hassubmittedthisround = true;
+								let tobesubmittedcards = [];
+								selectedwhitecards.forEach(e => {
+									tobesubmittedcards.push({
+										content: globalgamedata.whitecards[mywhitecards[e]].content,
+										submitter: myname
+									});
 								});
-							});
-							saveData("runninggames/" + gamecode + "/status/submittedwhitecards", (localgamedata.status.submittedwhitecards === undefined ? [] : Object.values(localgamedata.status.submittedwhitecards)).concat(tobesubmittedcards));
-							Swal.fire({
-								title: "Succesfully submitted cards",
-								icon: "success",
-								text: "Now you just have to wait for the others to submit their cards. You can see them popping up as they do."
-							});
-							selectedwhitecards.sort().reverse();
-							selectedwhitecards.forEach(e => {
-								mywhitecards.splice(e, 1);
-							});
-							selectedwhitecards = [];
-							updateCardsInDeck();
-							document.querySelectorAll("#deckGame .cardGame").forEach(e => {
-								e.classList.remove("selected");
-							});
-							submitGame.classList.add("invisible");
+								saveData("runninggames/" + gamecode + "/status/submittedwhitecards", (localgamedata.status.submittedwhitecards === undefined ? [] : Object.values(localgamedata.status.submittedwhitecards)).concat(tobesubmittedcards));
+								Swal.fire({
+									title: "Succesfully submitted cards",
+									icon: "success",
+									text: "Now you just have to wait for the others to submit their cards. You can see them popping up as they do."
+								});
+								selectedwhitecards.sort().reverse();
+								selectedwhitecards.forEach(e => {
+									mywhitecards.splice(e, 1);
+								});
+								selectedwhitecards = [];
+								updateCardsInDeck();
+								document.querySelectorAll("#deckGame .cardGame").forEach(e => {
+									e.classList.remove("selected");
+								});
+								submitGame.classList.add("invisible");
+							} else {
+								Swal.fire({
+									title: "You have already submitted",
+									icon: "warning",
+									text: "You have already submitted your cards for this round. I guess the dementia is kicking in early for you, huh?"
+								});
+							}
 						} else {
 							Swal.fire({
-								title: "You have already submitted",
-								icon: "warning",
-								text: "You have already submitted your cards for this round. I guess the dementia is kicking in early for you, huh?"
+								title: "Must submit " + reqanswers + " card" + (reqanswers == 1 ? "" : "s"),
+								icon: "error",
+								text: "The black card shown requires " + reqanswers + " card" + (reqanswers == 1 ? "" : "s") + ". You have " + selectedwhitecards.length + " selected."
 							});
 						}
 					} else {
 						Swal.fire({
-							title: "Must submit " + reqanswers + " card" + (reqanswers == 1 ? "" : "s"),
+							title: "Cannot submit cards as Czar",
 							icon: "error",
-							text: "The black card shown requires " + reqanswers + " card" + (reqanswers == 1 ? "" : "s") + ". You have " + selectedwhitecards.length + " selected."
+							text: "The czar (that's you right now) can't submit their cards because they are the one that chooses the winner for the round."
 						});
 					}
 				} else {
 					Swal.fire({
-						title: "Cannot submit cards as Czar",
+						title: "Cannot submit cards now",
 						icon: "error",
-						text: "The czar (that's you right now) can't submit their cards because they are the one that chooses the winner for the round."
+						text: "Be a little patient and wait for the next card to show, goldfish attention span lookin' ah"
 					});
 				}
-			} else {
-				Swal.fire({
-					title: "Cannot submit cards now",
-					icon: "error",
-					text: "Be a little patient and wait for the next card to show, goldfish attention span lookin' ah"
-				});
 			}
 		}
 
@@ -2591,7 +2598,7 @@
 					    }
 					}
 				});
-				if (!gamehasended) saveData("runninggames/" + gamecode + "/status/shownwhitecards", newshownwhitecards);
+				if (localgamedata && !gamehasended) saveData("runninggames/" + gamecode + "/status/shownwhitecards", newshownwhitecards);
 
 				if (document.querySelectorAll("#maincardconGame .cardGame[data-side=backside]:not(.black)").length == 0) {
 					setTimeout(() => {
@@ -2639,7 +2646,7 @@
 						cancelButtonText: "No, I change my mind",
 						cancelButtonColor: "#D33"
 					}).then((result) => {
-						if (result.isConfirmed && !gamehasended) {
+						if (result.isConfirmed && localgamedata && !gamehasended) {
 							saveData("runninggames/" + gamecode + "/status/winner", targettedsubmitter);
 							saveData("runninggames/" + gamecode + "/players/" + targettedsubmitter + "/points", localgamedata.players[targettedsubmitter].points + 1);
 						}
