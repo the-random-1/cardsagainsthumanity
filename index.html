@@ -612,10 +612,6 @@
 				z-index: 2;
 			}
 
-/*			#deckGame:hover {
-				animation: opendeck 300ms forwards;
-			}*/
-
 			@keyframes opendeck {
 				to {
 					overflow: scroll;
@@ -1401,74 +1397,6 @@
 				}
 			});
 		});
-
-// gamecode = "Q02U3W";
-
-
-// onValue(ref(db, "runninggames/" + gamecode), (snapshot) => {
-// 				localgamedata = snapshot.val();
-// 				generalGameUpdate(localgamedata);
-// 			});
-
-
-// setTimeout(() => {
-// onValue(ref(db, "runninggames/" + gamecode + "/players/" + myname), (snapshot) => {
-// 				if (snapshot.val() !== null) {
-// 					if (!(snapshot.val()).ispresent) saveData("runninggames/" + gamecode + "/players/" + myname + "/ispresent", true);
-// 				} else {
-// 					Swal.fire({
-// 						title: "You have been disconnected",
-// 						html: "You have been disconnected from the game. This was either because of an awful internet connection, or because you got kicked. The page will reload in 5 seconds. &#175;\\_(&#12484;)_/&#175;",
-// 						icon: "info"
-// 					}).then(result => {
-// 						setTimeout(() => {location.reload()}, 5000);
-// 					});
-// 				}
-// 			});
-// }, 2000);
-
-
-// setInterval(() => {
-// 						window.scrollTo(0, 0);
-// 					}, 1);
-
-
-// setTimeout(() => {
-// onValue(ref(db, "runninggames/" + gamecode + "/status/gamestatus"), (snapshot) => {
-// 						updateToGameStatus(snapshot.val() === null ? "" : snapshot.val());
-// 					});
-// onValue(ref(db, "runninggames/" + gamecode + "/status/submittedwhitecards"), (snapshot) => {
-// 						if (snapshot.val() !== null) {
-// 							snapshot = snapshot.val();
-// 							let newwhitecards = "";
-// 							for (let i in snapshot) {
-// 								newwhitecards += `<div class="cardGame backside" onclick='revealwhitecard("${snapshot[i].submitter.replace(/\"/g, "\″")}");choosewinner("${snapshot[i].submitter.replace(/\"/g, "\″")}");' data-cardid="${i}" data-submitter="${snapshot[i].submitter.replace(/\"/g, "\″")}" data-cardtext="${snapshot[i].content.replace(/\"/g, "\″")}">
-// 													<button class="expandcardGame" tabindex="-1"><i class="fa fa-external-link"></i></button>
-// 													<p>Cards Against Humanity</p>
-// 												</div>`;
-// 							}
-// 							document.querySelectorAll(selectallcards).forEach(e => {
-// 								e.remove();
-// 							});
-// 							maincardconGame.innerHTML += newwhitecards;
-// 							updateCardSides();
-// 							if (snapshot.length == (Object.keys(localgamedata.players).length - 1) * Math.max(globalgamedata.blackcards[localgamedata.status.shownblackcardid].content.split("*").length - 1, 1) && gamestatus == "czarisrevealing") {
-// 								updateGameStatus("reactions");
-// 							}
-// 						} else {
-// 							document.querySelectorAll(selectallcards).forEach((e, index) => {
-// 								setTimeout(() => {fadeElement(e, 1500);}, 500 / (document.querySelectorAll(selectallcards).length - 1) * index);
-// 							});
-// 						}
-// 					});
-// },500);
-
-
-// get(child(ref(db), "globalgamedata")).then((value) => {
-// 				globalgamedata = value.val();
-// 			});
-
-
 
 		// General functions
 
