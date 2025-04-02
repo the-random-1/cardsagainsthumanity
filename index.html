@@ -2194,6 +2194,9 @@
 											alerttxtGame.innerText = winnerwinner + " won!";
 											setTimeout(() => {
 												hideAlert();
+												currczarstats[1] = currczarstats[1] + 1;
+												if (currczarstats[1] >= playernames.length) currczarstats[1] = 0;
+												currczarstats[0] = playernames[currczarstats[1]];
 												updateGameStatus("");
 												removeData("runninggames/" + gamecode + "/status/submittedwhitecards");
 												removeData("runninggames/" + gamecode + "/status/shownwhitecards");
@@ -2216,10 +2219,6 @@
 														}, 500);
 													}, 1000); // After 1 second, places black card back in deck
 												}, 2000); // After 2 seconds, hides black card
-
-												currczarstats[1] = currczarstats[1] + 1;
-												if (currczarstats[1] >= playernames.length) currczarstats[1] = 0;
-												currczarstats[0] = playernames[currczarstats[1]];
 
 												if (localgamedata) {
 													if (myname == localgamedata.host && !gamehasended) {
@@ -2426,7 +2425,7 @@
 
 		function resetonclicks() {
 			blackdeckGame.onclick = () => {
-				if (myname == localgamedata.czar) {
+				if (myname == localgamedata.czar && gamestatus == "") {
 					drawcard();
 					updateGameStatus("czarisdrawing");
 				}
