@@ -1736,8 +1736,8 @@
 			ishost = isHost;
 
 			onValue(ref(db, "runninggames/" + gamecode + "/players"), (snapshot) => {
-				if (localgamedata) {
-					snapshot = snapshot.val() === null ? [] : Object.keys(snapshot.val());
+				if (snapshot.val() !== null) {
+					snapshot = Object.keys(snapshot.val());
 
 					if (localgamedata.status.started) {
 						if (!snapshot.includes(currczarstats[0]) && snapshot.length >= 3) Swal.close();
@@ -1822,7 +1822,7 @@
 						}
 					}
 
-					if (!localgamedata.status.started) {
+					if (localgamedata && !localgamedata.status.started) {
 						playerlistLobby.innerHTML = "";
 
 						snapshot.forEach((currname, index) => {
@@ -2102,7 +2102,7 @@
 						setTimeout(() => {
 							if (localgamedata) {
 								let tobeusedhtml;
-								if (myname == localgamedata.czar) {
+								if (myname == currczarstats[0]) {
 									if (!dontshowtutorial[0]) {
 										Swal.fire({
 											title: "How to play",
@@ -2120,7 +2120,7 @@
 									}
 								}
 
-								if (myname != localgamedata.czar && !dontshowtutorial[1]) {
+								if (myname != currczarstats[0] && !dontshowtutorial[1]) {
 									Swal.fire({
 										title: "How to play",
 										icon: "info",
@@ -2130,7 +2130,7 @@
 									});
 								}
 							}
-						}, localgamedata.status.roundsfinished != 0 || firstczarstats[1] != currczarstats[1] ? 3500 : 500);
+						}, (localgamedata ? localgamedata.status.roundsfinished : 0) != 0 || firstczarstats[1] != currczarstats[1] ? 3500 : 500);
 				}
 			}
 		}
@@ -2144,7 +2144,7 @@
 		}
 
 		generalGameUpdate = (currgamedata) => {
-			if (currgamedata !== null) {
+			if (currgamedata !== null && currgamedata !== undefined && currgamedata) {
 				setTimeout(() => {updateCardSides()}, 300);
 				updateMobileview();
 				let allelemens = document.querySelectorAll("*");
@@ -2230,7 +2230,7 @@
 													}
 												}
 
-												if (localgamedata.status.roundsfinished == localgamedata.settings.rounds) endgame(2192);
+												if (localgamedata.status.roundsfinished == localgamedata.settings.rounds) endgame(2233);
 											}, 3000); // After 3 seconds, resets everything
 										}, 1000); // After 1 second, alerts "[player] won!"
 									}
