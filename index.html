@@ -2109,7 +2109,7 @@
 											icon: "info",
 											html: `<p>You are the czar for this cycle. Click on game elements in the middle to interact with them. It's pretty simple, really.</p><input checked style="cursor: pointer;" type="checkbox" id="dontshowagainGame"><label style="user-select: none; cursor: default; margin-left: 5px;" for="dontshowagainGame">Don't show again</label>`
 										}).then(result => {
-											dontshowtutorial[0] = document.getElementById("dontshowagainGame").checked;
+											if (result.isConfirmed) dontshowtutorial[0] = document.getElementById("dontshowagainGame").checked;
 										});
 									} else {
 										Swal.fire({
@@ -2124,9 +2124,9 @@
 									Swal.fire({
 										title: "How to play",
 										icon: "info",
-										html: `<p>You are a normal player for this cycle. ${!mobile ? "Hover over your deck" : "Click on your deck"} (the purple part at the bottom) to open it. Click on the purple plus icon to draw a card to build up a deck of at most 12 cards at one time.</p><input checked style="cursor: pointer;" type="checkbox" id="dontshowagainGame"><label style="user-select: none; cursor: default; margin-left: 5px;" for="dontshowagainGame">Don't show again</label>`
+										html: `<p>You are a normal player for this cycle. ${!mobile ? "Hover over your deck" : "Click on your deck"} (the purple bar at the bottom) to open it. Click on the purple plus icon to draw a card to build up a deck of at most 12 cards at one time.</p><input checked style="cursor: pointer;" type="checkbox" id="dontshowagainGame"><label style="user-select: none; cursor: default; margin-left: 5px;" for="dontshowagainGame">Don't show again</label>`
 									}).then(result => {
-										dontshowtutorial[1] = document.getElementById("dontshowagainGame").checked;
+										if (result.isConfirmed) dontshowtutorial[1] = document.getElementById("dontshowagainGame").checked;
 									});
 								}
 							}
